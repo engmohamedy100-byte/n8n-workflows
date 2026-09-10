@@ -1,0 +1,455 @@
+{
+  "name": "Follow المنافس _web scraping",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7393611f-c7cd-446e-acc1-dfa11ca66a29",
+              "name": "website_url",
+              "value": "https://www.ikea.com/eg/en/cat/sofa-beds-10663/",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "129ebfe1-e57d-4af4-a1d3-7e272f2d090f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Edit Fields').item.json.website_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "bb514e99-4e81-42ec-967f-f1a71ffed68f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = $input.first().json.data;\n\nconst decoded = html\n  .replace(/&quot;/g, '\"')\n  .replace(/&amp;/g, '&')\n  .replace(/&#39;/g, \"'\")\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>');\n\nconst products = [];\n\nconst productMarker = '\"@type\":\"Product\"';\n\nlet position = 0;\n\nwhile (true) {\n  const start = decoded.indexOf(productMarker, position);\n\n  if (start === -1) break;\n\n  // Find the next Product to define this product's section\n  const next = decoded.indexOf(productMarker, start + productMarker.length);\n\n  const section = decoded.substring(\n    start,\n    next === -1 ? decoded.length : next\n  );\n\n  const getValue = (regex) => {\n    const match = section.match(regex);\n    return match ? match[1] : null;\n  };\n\n  const name = getValue(/\"name\":\"([^\"]+)\"/);\n\n  const url = getValue(/\"url\":\"([^\"]+)\"/);\n\n  const image = getValue(/\"image\":\"([^\"]+)\"/);\n\n  const price = getValue(\n    /\"price\":(\\d+(?:\\.\\d+)?)/\n  );\n\n  const currency = getValue(\n    /\"priceCurrency\":\"([^\"]+)\"/\n  );\n\n  const rating = getValue(\n    /\"ratingValue\":([\\d.]+)/\n  );\n\n  const reviewCount = getValue(\n    /\"reviewCount\":(\\d+)/\n  );\n\n  if (name && url) {\n    products.push({\n      name,\n      url,\n      image,\n      price: price ? Number(price) : null,\n      currency,\n      rating: rating ? Number(rating) : null,\n      reviewCount: reviewCount ? Number(reviewCount) : null\n    });\n  }\n\n  position = start + productMarker.length;\n}\n\nreturn products.map(product => ({\n  json: product\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "6d381c3b-f08d-42aa-9a71-67f383b233eb",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "tableId": "competitor_products",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "product_name",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.name }}"
+            },
+            {
+              "fieldId": "product_url",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.url }}"
+            },
+            {
+              "fieldId": "image_url",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.image }}"
+            },
+            {
+              "fieldId": "price",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.price }}"
+            },
+            {
+              "fieldId": "currency",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.currency }}"
+            },
+            {
+              "fieldId": "rating",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.rating }}"
+            },
+            {
+              "fieldId": "review_count",
+              "fieldValue": "={{ $('Code in JavaScript').item.json.reviewCount }}"
+            },
+            {
+              "fieldId": "scraped_at",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "competitor",
+              "fieldValue": "IKEA"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        176
+      ],
+      "id": "c1e8e86a-65fa-405b-9deb-ce265b242506",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "rCkImGHxCBMhBipi",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "competitor_products",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "product_url",
+              "condition": "eq",
+              "keyValue": "={{ $json.url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        896,
+        0
+      ],
+      "id": "95e25a5d-2637-4296-ba2f-c0f1d356ff27",
+      "name": "Get many rows",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "rCkImGHxCBMhBipi",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8ef5362d-6553-4651-bfe5-7aa828b12521",
+              "leftValue": "={{ $json.product_url }}",
+              "rightValue": "={{ $json.product_url }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "c22318fd-39f6-4e7a-a36e-425d7c94f80c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "95485f14-869b-4a7d-a8e1-d7eb79680ae3",
+              "leftValue": "={{ $('Code in JavaScript').item.json.price }}",
+              "rightValue": "={{ $('Get many rows').item.json.price }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1424,
+        -160
+      ],
+      "id": "e8e69b06-9cd5-4403-9237-1f55376f0f5e",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ebb00f41-85f1-4623-bec9-b62a2a74d6ff",
+              "name": "oldPrice",
+              "value": "={{ $json.price }}",
+              "type": "number"
+            },
+            {
+              "id": "ab00b76f-4063-457c-9424-00be12b60de7",
+              "name": "currantPrice",
+              "value": "={{ $('Code in JavaScript').item.json.price }}",
+              "type": "number"
+            },
+            {
+              "id": "897787b8-3570-44f3-907e-2b017febf10b",
+              "name": "product_name",
+              "value": "={{ $json.product_name }}",
+              "type": "string"
+            },
+            {
+              "id": "636ce3de-d742-43e4-a40d-46bc11f660e1",
+              "name": "product_url",
+              "value": "={{ $json.product_url }}",
+              "type": "string"
+            },
+            {
+              "id": "84abf64c-b613-4347-918e-2a78828afd6f",
+              "name": "image_url",
+              "value": "={{ $json.image_url }}",
+              "type": "string"
+            },
+            {
+              "id": "5100d009-7812-4bc4-a23d-3ab2b0ed7868",
+              "name": "currency",
+              "value": "={{ $json.currency }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1680,
+        -144
+      ],
+      "id": "3d068d97-2c66-4215-a867-3c16fa63d67b",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a1ca22c8-6e33-40e9-bf7e-f7fcd202eabd",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "Change Pricing",
+        "emailType": "text",
+        "message": "={{ $json.product_name }} is changed\n\n{{ $json.image_url }}\n\nOld price is {{ $json.oldPrice }}{{ $json.currency }}\nand the current price is {{ $json.currantPrice }}{{ $json.currency }}\n\nPercentage change is {{ ((($json.currantPrice - $json.oldPrice) / $json.oldPrice) * 100).toFixed(2) }}%",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1904,
+        -48
+      ],
+      "id": "ce9406dd-02a1-44e2-9ff9-f6279c17bdce",
+      "name": "change pricing",
+      "webhookId": "99841241-a6a1-4315-92be-cb299d753475",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JiY3Ci5TVNcINytZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "Change Pricing",
+        "emailType": "text",
+        "message": "={{$('If').item.json.product_name }} is Added\n\n{{ $('If').item.json.image_url }}\n\nthe price is {{ $('If').item.json.oldPrice }}{{$('If').item.json.currency }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        112
+      ],
+      "id": "e66c7631-cb0d-4bc4-8e4e-c7f5500ccc4d",
+      "name": "new item",
+      "webhookId": "46a8546b-1d58-47a4-b7b6-7a18b7c61738",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JiY3Ci5TVNcINytZ",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "change pricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "new item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7f69e8ec-c4f0-4480-a4e1-6bd22c96af7c",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "3dYRMepMa4buwHbq",
+  "tags": []
+}

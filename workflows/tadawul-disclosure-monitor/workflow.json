@@ -1,0 +1,1101 @@
+{
+  "name": "Tadawul Disclosure Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "308d8b41-ef15-4d6c-ab19-b0c2539f65f1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -3056,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_12>",
+          "mode": "list",
+          "cachedResultName": "Disclosure Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_12>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Watchlist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_12>/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "204e22a3-8dee-4b46-9dcf-254ce8617fd2",
+      "name": "Get Watchlist",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -2736,
+        272
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-active",
+              "leftValue": "={{ $json.active }}\n",
+              "rightValue": "=true",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "6c7135b7-a8ab-42d5-b808-9c807ccb8d0d",
+              "leftValue": "=",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "070307d4-580d-40f5-af82-1720f5f69a78",
+      "name": "Filter Active Companies",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -2448,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "fa831477-d133-47a7-baec-47bb3b78d52f",
+      "name": "Loop Over Companies",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2192,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ {\n  \"company_name\": $json.company_name,\n  \"country\": $json.country,\n  \"ticker\": String($json.ticker),\n  \"market\": $json.market,\n  \"todayDate\": $now.setZone('Asia/Riyadh').day + '-' + $now.setZone('Asia/Riyadh').month + '-' + $now.setZone('Asia/Riyadh').year\n} }}",
+        "options": {}
+      },
+      "id": "df2c3afe-6770-43dc-9017-1f01629051db",
+      "name": "Build Apify Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1984,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/generous_heavens~tadawul-disclosure-monitor-saudi-exchange/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": " application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    ticker: String($json.ticker).trim(),\n    market: String($json.market).trim(),\n    country: String($json.country).trim(),\n    maxResults: 1,\n    onlyNew: false,\n    proxyConfiguration: {\n      useApifyProxy: true\n    }\n  }\n}}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "1da57fb4-0a04-42ca-bd46-e31a2bb08fb2",
+      "name": "Call Apify Actor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1808,
+        288
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "at3ftxkACN16k6mJ",
+          "name": "Header Auth account 2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Guarantee exactly ONE output item per company, whether Apify returned\n// 0, 1, or several disclosures. This keeps the loop alive even with no results.\nconst companyItem = $('Build Apify Input').first().json;\nconst rawItems = $input.all();\n\nlet disclosures = [];\nfor (const it of rawItems) {\n  if (Array.isArray(it.json)) {\n    disclosures.push(...it.json);\n  } else if (it.json && Object.keys(it.json).length > 0) {\n    disclosures.push(it.json);\n  }\n}\ndisclosures = disclosures.filter(d => d && d.disclosure_url);\n\nreturn [{\n  json: {\n    company_name: companyItem.company_name,\n    ticker: companyItem.ticker,\n    market: companyItem.market,\n    hasDisclosure: disclosures.length > 0,\n    disclosures\n  }\n}];\n"
+      },
+      "id": "5648c4e5-f58f-4bbb-833a-aa17bb620220",
+      "name": "Normalize Actor Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1536,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-has-disclosure",
+              "leftValue": "={{ $json.hasDisclosure }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "513c8b31-82ef-4d21-a64a-466a573e9fcd",
+      "name": "Has Disclosure Today?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1328,
+        112
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "1cca0e18-cd02-4c6a-bd99-cffc8971ae46",
+      "name": "No Disclosure - Skip",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "disclosures",
+        "options": {}
+      },
+      "id": "153cc599-494d-4991-a1ca-b0d97986bcc1",
+      "name": "Split Disclosures",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_12>",
+          "mode": "list",
+          "cachedResultName": "Disclosure Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_12>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1171197715,
+          "mode": "list",
+          "cachedResultName": "ProcessedDisclosures",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_12>/edit#gid=1171197715"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "disclosure_id",
+              "lookupValue": "={{ $json.disclosure_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e76bbd92-5986-41e5-bbf9-d0496e055df4",
+      "name": "Search Processed Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -768,
+        -96
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-already-processed",
+              "leftValue": "={{ $json.disclosure_id }}",
+              "rightValue": true,
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e87da386-7889-4da8-8519-30975574f3a7",
+      "name": "Already Processed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -464,
+        -256
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "49db9ce8-f4cc-462b-b370-956b15a84ad5",
+      "name": "Duplicate - Skip",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -512
+      ]
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "3f4a87a1-7fda-4b51-8d89-4d68d7a87adc",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -48
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "mmX3lBuFbUQHnOEh",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=أنت محلل مالي متخصص في السوق السعودي (تداول). حلّل الإفصاح التالي من {{ $('Split Disclosures').item.json.company_name }} ({{ $('Split Disclosures').item.json.ticker }}) بعنوان: \"{{ $('Split Disclosures').item.json.disclosure_title }}\".\n\nفيما يلي النص الفعلي المستخرج من صفحة الإفصاح:\n---\n{{ $json.page_text ? $json.page_text : 'تعذر استخراج النص الكامل بسبب مشكلة تقنية — اعتمد على العنوان فقط، ونبّه صراحة أن التفاصيل الكاملة غير متوفرة وأن القارئ يجب أن يراجع الرابط الأصلي.' }}\n---\n\nاكتب تحليلاً موجزاً بالعربية (٥-٨ أسطر كحد أقصى) يغطي:\n- ماذا حدث؟\n- لماذا هذا الإفصاح مهم؟\n- أي معلومات مالية/تجارية مهمة (صفقة، عقد، مشروع، استحواذ، توزيعات أرباح، نتائج مالية، حدث جوهري)\n- أي أرقام مهمة مذكورة\n- التأثير المحتمل على الشركة\n\nمهم جداً: استخدم فقط المعلومات الموجودة في النص المستخرج أعلاه. لا تختلق أي معلومة غير موجودة فيه. إذا كان النص المستخرج غير كافٍ أو غير واضح، وضّح ذلك صراحة واذكر أن التفاصيل الكاملة متاحة في الرابط الأصلي، بدلاً من التخمين."
+      },
+      "id": "4269af22-d59b-49f0-a11b-b8b2eb4451f0",
+      "name": "Analyze Disclosure",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        320,
+        -240
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a66b372-2216-46c7-a135-c67bdf2d33d7",
+              "name": "emailSubject",
+              "value": "={{ '(' + $('Split Disclosures').item.json.ticker + ') إفصاح جديد' }}",
+              "type": "string"
+            },
+            {
+              "id": "98b83701-70e5-43b7-af6d-fb0655d8bd46",
+              "name": "emailBody",
+              "value": "={{ 'الشركة: ' + $('Split Disclosures').item.json.company_name + '\\n\\n' + 'السوق: ' + $('Split Disclosures').item.json.market + '\\n' + 'عنوان الإفصاح: ' + $('Split Disclosures').item.json.disclosure_title + '\\n' + 'تاريخ الإفصاح: ' + $('Split Disclosures').item.json.disclosure_date + '\\n' + 'وقت الإفصاح: ' + $('Split Disclosures').item.json.disclosure_time + '\\n\\n' + 'نص الإفصاح:\\n' + ($json.text || '') + '\\n\\n' + 'رابط الإفصاح:\\n' + $('Split Disclosures').item.json.disclosure_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7def7ed5-07dd-474e-bd01-e7af0276af54",
+      "name": "Build Email Content",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        752,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "={{ $json.emailSubject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "44aad728-0b7f-4649-90b3-3f9038cd862b",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        -256
+      ],
+      "webhookId": "721f8bc9-9e6f-4105-8aa1-dc6d4f2d22e7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yEixcOcUAXDP0bFE",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_12>",
+          "mode": "list",
+          "cachedResultName": "Disclosure Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_12>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1171197715,
+          "mode": "list",
+          "cachedResultName": "ProcessedDisclosures",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_12>/edit#gid=1171197715"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "disclosure_id": "={{ $('Split Disclosures').item.json.disclosure_id }}",
+            "company_name": "={{ $('Split Disclosures').item.json.company_name }}",
+            "ticker": "={{ $('Split Disclosures').item.json.ticker }}",
+            "market": "={{ $('Split Disclosures').item.json.market }}",
+            "disclosure_title": "={{ $('Split Disclosures').item.json.disclosure_title }}",
+            "disclosure_date": "={{ $('Split Disclosures').item.json.disclosure_date }}",
+            "disclosure_time": "={{ $('Split Disclosures').item.json.disclosure_time }}",
+            "disclosure_url": "={{ $('Split Disclosures').item.json.disclosure_url }}",
+            "ai_summary": "={{ $('Analyze Disclosure').item.json.text }}",
+            "alert_sent": true,
+            "processed_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "disclosure_id",
+              "displayName": "disclosure_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company_name",
+              "displayName": "company_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ticker",
+              "displayName": "ticker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "market",
+              "displayName": "market",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "disclosure_title",
+              "displayName": "disclosure_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "disclosure_date",
+              "displayName": "disclosure_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "disclosure_time",
+              "displayName": "disclosure_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "disclosure_url",
+              "displayName": "disclosure_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_summary",
+              "displayName": "ai_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alert_sent",
+              "displayName": "alert_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "processed_at",
+              "displayName": "processed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7732ce95-c182-411d-8eab-962a71894cc1",
+      "name": "Save Processed Disclosure",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1360,
+        -272
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_12>",
+          "mode": "list",
+          "cachedResultName": "Disclosure Company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_12>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1301898579,
+          "mode": "list",
+          "cachedResultName": "ErrorLog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_12>/edit#gid=1301898579"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "occurred_at": "={{ $now.toISO() }}",
+            "node": "={{ $json.error ? $json.error.node?.name : 'unknown' }}",
+            "company_name": "={{ $('Build Apify Input').first().json.company_name }}",
+            "ticker": "={{ $('Build Apify Input').first().json.ticker }}",
+            "error_message": "={{ $json.error ? $json.error.message : JSON.stringify($json) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "node",
+              "displayName": "node",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company_name",
+              "displayName": "company_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ticker",
+              "displayName": "ticker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2c73b530-290c-4c26-8806-a814634d761b",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1680,
+        288
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "142875ec-35fe-49e9-b99a-0487dca9c37e",
+      "name": "Continue Loop",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2192,
+        576
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "1e5e48e5-076c-4ed1-a372-27417260027e",
+      "name": "All Companies Done",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1808,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify~rag-web-browser/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"query\": $('Split Disclosures').item.json.disclosure_url, \"maxResults\": 1 } }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -128,
+        -240
+      ],
+      "id": "2bc30c35-92da-4053-b282-681c75fb0c29",
+      "name": "RAG Web Browser",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "at3ftxkACN16k6mJ",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const disclosure = $('Split Disclosures').item.json;\nconst items = $input.all();\n\nlet markdown = '';\nif (items.length && items[0].json && items[0].json.markdown) {\n  markdown = items[0].json.markdown;\n}\n\nlet text = String(markdown).trim();\n\n// ==========================================================\n// كشف الترميز التالف (mojibake)\n// ==========================================================\n// أحيانًا صفحة تداول بترجع بدون charset واضح، فبيتفسر النص\n// العربي غلط كحروف صينية/كورية. لو لقينا نسبة عالية من حروف\n// CJK في نص المفروض يكون عربي بالكامل، ده دليل على تلف.\nconst cjkMatches = text.match(/[\\u4e00-\\u9fff]/g) || [];\nconst isCorrupted = cjkMatches.length > 30;\n\nif (isCorrupted) {\n  return [{\n    json: {\n      ...disclosure,\n      page_text: null,\n      extraction_note: 'تعذر استخراج النص بشكل صحيح (تلف في الترميز) — سيتم الاعتماد على العنوان فقط.'\n    }\n  }];\n}\n\nconst startMarker = 'IssuerAnnouncementDetailsV2Portlet';\nconst endMarker = 'لا تتحمل أي من هيئة السوق المالية';\nconst startIdx = text.indexOf(startMarker);\nconst endIdx = text.indexOf(endMarker);\n\nif (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {\n  text = text.slice(startIdx + startMarker.length, endIdx).trim();\n}\n\nconst MAX_CHARS = 6000;\nif (text.length > MAX_CHARS) {\n  text = text.slice(0, MAX_CHARS) + ' ...[truncated]';\n}\n\nreturn [{\n  json: {\n    ...disclosure,\n    page_text: text || null\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        -240
+      ],
+      "id": "1c99864c-1711-4ed7-9edf-1f127f36742b",
+      "name": "Extract Disclosure Text"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0f07a302-ceb9-42a6-89cb-70a207f7c5ec",
+              "leftValue": "={{ $json.disclosure_date }}",
+              "rightValue": "={{ $now.setZone('Asia/Riyadh').toFormat('d-M-yyyy') }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1408,
+        272
+      ],
+      "id": "ab730e43-3314-45a0-90b1-ed173d51fc72",
+      "name": "Current Date?"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Watchlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Watchlist": {
+      "main": [
+        [
+          {
+            "node": "Filter Active Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Active Companies": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Companies": {
+      "main": [
+        [
+          {
+            "node": "All Companies Done",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Apify Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Apify Input": {
+      "main": [
+        [
+          {
+            "node": "Call Apify Actor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Apify Actor": {
+      "main": [
+        [
+          {
+            "node": "Current Date?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Actor Response": {
+      "main": [
+        [
+          {
+            "node": "Has Disclosure Today?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Disclosure Today?": {
+      "main": [
+        [
+          {
+            "node": "Split Disclosures",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Disclosure - Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Disclosure - Skip": {
+      "main": [
+        [
+          {
+            "node": "Continue Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Disclosures": {
+      "main": [
+        [
+          {
+            "node": "Search Processed Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Processed Sheet": {
+      "main": [
+        [
+          {
+            "node": "Already Processed?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Already Processed?": {
+      "main": [
+        [
+          {
+            "node": "Duplicate - Skip",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "RAG Web Browser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate - Skip": {
+      "main": [
+        [
+          {
+            "node": "Continue Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Disclosure",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Disclosure": {
+      "main": [
+        [
+          {
+            "node": "Build Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Email Content": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Alert Email": {
+      "main": [
+        [
+          {
+            "node": "Save Processed Disclosure",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Processed Disclosure": {
+      "main": [
+        [
+          {
+            "node": "Continue Loop",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Error": {
+      "main": [
+        [
+          {
+            "node": "Continue Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue Loop": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG Web Browser": {
+      "main": [
+        [
+          {
+            "node": "Extract Disclosure Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Disclosure Text": {
+      "main": [
+        [
+          {
+            "node": "Analyze Disclosure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Current Date?": {
+      "main": [
+        [
+          {
+            "node": "Normalize Actor Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Continue Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d44a3523-6240-442c-87ef-1f525be5f562",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "MoTJdFnSbKWLtTRC",
+  "tags": []
+}

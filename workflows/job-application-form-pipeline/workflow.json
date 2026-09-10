@@ -1,0 +1,1521 @@
+{
+  "name": "Job Application Form -> Email Validation -> Google Sheets (with Cleanup)",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Job Application Form",
+        "formDescription": "Apply for a position with us. All fields are required.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Job Position",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Frontend Developer"
+                  },
+                  {
+                    "option": "Backend Developer"
+                  },
+                  {
+                    "option": "Data Analyst"
+                  },
+                  {
+                    "option": "Product Manager"
+                  },
+                  {
+                    "option": "AI Automation"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "CV",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -784,
+        2624
+      ],
+      "id": "d254c7ff-7fdc-439d-9a71-fdfdb9e27026",
+      "name": "Job Application Form",
+      "webhookId": "aeba1313-7f07-415b-9fe1-ae178c791db6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "email-format-check",
+              "leftValue": "={{ $('Job Application Form').item.json.Email }}",
+              "rightValue": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        2608
+      ],
+      "id": "d911ee60-11e0-4334-ba4f-c6340054ba91",
+      "name": "Check Email Format"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_9>",
+          "mode": "list",
+          "cachedResultName": "REDA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 82165406,
+          "mode": "list",
+          "cachedResultName": "الورقة3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit#gid=82165406"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Under Reviewing",
+            "CV": "={{ $json.webViewLink }}",
+            "Responded": "false",
+            "FullName": "={{ $('Job Application Form').item.json[\"Full Name\"] }}",
+            "Email": "={{ $('Job Application Form').item.json.Email }}",
+            "JP": "={{ $('Job Application Form').item.json[\"Job Position\"] }}",
+            "Date": "={{ $('Job Application Form').item.json.submittedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "FullName",
+              "displayName": "FullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "JP",
+              "displayName": "JP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CV",
+              "displayName": "CV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Why",
+              "displayName": "Why",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Responded",
+              "displayName": "Responded",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        656,
+        2480
+      ],
+      "id": "1b702d91-f655-41bf-93cc-6f68ce12140f",
+      "name": "Add to Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Invalid Email",
+        "completionMessage": "The email address you entered is not valid. Please go back and submit the form again with a correct email address.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        656,
+        2752
+      ],
+      "id": "0e3f86d4-5eba-40d8-a4d2-5d6e6a43d841",
+      "name": "Invalid Email Message",
+      "webhookId": "a739f7d7-c1e8-4b6e-b6d8-8656ee2e1dda"
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "Amazon",
+        "emailType": "text",
+        "message": "Thank you! Your application has been submitted successfully.\n We will review your CV and get back to you soon.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        2480
+      ],
+      "id": "44b17f52-8d7d-47f2-9657-86426367d2d9",
+      "name": "Send a message",
+      "webhookId": "74e726d4-a96f-476b-a4f2-102e7ff6a2d8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yEixcOcUAXDP0bFE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "=CV",
+        "name": "={{$('Code in JavaScript').item.json.applicationId+ $('Job Application Form').item.json.CV.filename}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_10>",
+          "mode": "list",
+          "cachedResultName": "New Leads",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/<GOOGLE_RESOURCE_ID_10>"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        176,
+        2608
+      ],
+      "id": "9092cba2-6b2f-49f0-a85c-b95203d6dcf1",
+      "name": "Upload file",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "DeojzxiEqVPnggRt",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\n\nconst date = now.toISOString()\n  .slice(0, 10)\n  .replace(/-/g, '');\n\nconst time = now.getTime().toString().slice(-6);\n\nconst applicationId = `APP-${date}-${time}`;\n\nreturn [{\n  json: {\n    ...$json,\n    applicationId\n  },\n  binary: $('Job Application Form').item.binary\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        2608
+      ],
+      "id": "6f7ac311-7db7-4a34-9df9-14205a6fefb8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_9>",
+          "mode": "list",
+          "cachedResultName": "REDA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 82165406,
+          "mode": "list",
+          "cachedResultName": "الورقة3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit#gid=82165406"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "FullName",
+              "lookupValue": "={{ $json[\"Full Name\"] }}"
+            },
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            },
+            {
+              "lookupColumn": "JP",
+              "lookupValue": "={{ $json[\"Job Position\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -544,
+        2624
+      ],
+      "id": "7f0ef51a-5a99-412f-b5ba-6c710dafc07d",
+      "name": "Get row(s) in sheet",
+      "retryOnFail": false,
+      "maxTries": 2,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "58dad96c-7756-4293-a0ec-347480da961c",
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -336,
+        2624
+      ],
+      "id": "c1aac8bc-f5d6-4585-b209-c96af5f5f117",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -800,
+        3184
+      ],
+      "id": "5bc7f5ba-0eac-4fa1-88ad-29f3365a2b66",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_9>",
+          "mode": "list",
+          "cachedResultName": "REDA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 82165406,
+          "mode": "list",
+          "cachedResultName": "الورقة3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit#gid=82165406"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "=Under Reviewing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -544,
+        3184
+      ],
+      "id": "013d72d1-aca5-4d50-b114-de7130c6e1c5",
+      "name": "Get Under Reviewing",
+      "retryOnFail": false,
+      "maxTries": 2,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -320,
+        3184
+      ],
+      "id": "71c27dff-ebdd-4a32-af42-fa89e47772a4",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2eaa418b-5a02-4c96-9095-dda1182ea5ac",
+              "name": "Job Position",
+              "value": "={{ $('Loop Over Items').item.json.JP }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        3200
+      ],
+      "id": "30c8b896-0b39-468d-82c1-836e6dd51614",
+      "name": "JP"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "= {{ $json.CV }}",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -32,
+        3200
+      ],
+      "id": "c2eb39f6-9e9a-499d-8939-005559076603",
+      "name": "Get CV",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "DeojzxiEqVPnggRt",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json['Job Position']+1 }}",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        608,
+        3200
+      ],
+      "id": "db144587-cab4-4911-9787-4fecdb9fc058",
+      "name": "Get Job Discription",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "DeojzxiEqVPnggRt",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Get Job Discription').first().json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        768,
+        3200
+      ],
+      "id": "c07aa1e3-353e-4ee8-9d29-8a16fc20fd96",
+      "name": "Get Job Discription1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "DeojzxiEqVPnggRt",
+          "name": "Google Drive account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "3f6dc675-0ec0-4ad5-8c7a-4c683f10d11f",
+      "name": "Extract CV",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        112,
+        3200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "11fc6f0a-0dc7-4583-b740-bafc8fb36d5d",
+      "name": "Extract Job Discription",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        3184
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7b655de3-fbf8-4800-adc8-df10df9bd401",
+              "name": "Job Description",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "0b8cc2d3-0d07-4603-a958-b49d5ee11234",
+              "name": "CV",
+              "value": "={{ $('Extract CV').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "8be7f885-d4c2-4cc7-93ad-bb326203354b",
+              "name": "Email",
+              "value": "={{ $('Loop Over Items').item.json.Email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1264,
+        3184
+      ],
+      "id": "d43b351c-e373-479b-9ea0-40f3a1e2d4ef",
+      "name": "CV/Job"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Senior Technical Recruiter — CV vs Job Description Evaluation\n\nYou are a **Senior Technical Recruiter and Technical Hiring Specialist** with extensive experience evaluating candidates for technical roles.\n\nYour task is to objectively evaluate a candidate by comparing their **CV** against the **Job Description (JD)**.\n\nYour evaluation MUST be **evidence-based, structured, consistent, and independent of the AI model being used**.\n\nDo NOT evaluate the candidate based on general impressions, writing quality, CV formatting, or personal assumptions.\n\n---\n\n## INPUT\n\nYou will receive two pieces of information:\n\n### 1. Candidate CV:\n{{ $json.CV }}\n\n### 2. Job Description:\n{{ $json['Job Description'] }}\n\n---\n\n# EVALUATION METHODOLOGY\n\nEvaluate the candidate using the following fixed scoring framework.\n\nThe final score MUST be calculated using these weighted criteria:\n\n| Criterion                             |   Weight |\n| ------------------------------------- | -------: |\n| Required Technical Skills             |      30% |\n| Relevant Professional Experience      |      25% |\n| Job Responsibilities Match            |      20% |\n| Required Qualifications / Education   |      10% |\n| Seniority / Years of Experience       |      10% |\n| Relevant Domain / Industry Experience |       5% |\n| **TOTAL**                             | **100%** |\n\n---\n\n# STEP 1 — EXTRACT JOB REQUIREMENTS\n\nBefore scoring, identify the requirements from the Job Description.\n\nSeparate them into:\n\n### Must-Have Requirements\n\nRequirements explicitly described as required, mandatory, essential, or necessary.\n\nExamples:\n\n* Required programming language\n* Required framework\n* Required years of experience\n* Required degree\n* Required certification\n* Required technical skill\n\n### Preferred / Nice-to-Have Requirements\n\nRequirements described as:\n\n* preferred\n* plus\n* bonus\n* desirable\n* nice to have\n\nDo NOT treat preferred requirements as mandatory.\n\n---\n\n# STEP 2 — EVALUATE TECHNICAL SKILLS — 30%\n\nCompare the candidate's demonstrated technical skills against the technical requirements of the JD.\n\nConsider:\n\n* Programming languages\n* Frameworks\n* Libraries\n* Databases\n* Cloud technologies\n* DevOps tools\n* APIs\n* Architecture\n* Testing\n* Development methodologies\n* Other explicitly required technical technologies\n\nUse evidence from the CV.\n\nDo NOT assume that a candidate knows a technology simply because they know a similar technology.\n\nFor example:\n\nKnowing React does NOT automatically mean the candidate knows Angular.\n\nKnowing Java does NOT automatically mean the candidate knows C#.\n\nMissing explicit evidence must be treated as \"Not Demonstrated\", not as \"Yes\".\n\n---\n\n# STEP 3 — RELEVANT EXPERIENCE — 25%\n\nEvaluate how closely the candidate's previous professional experience matches the role.\n\nConsider:\n\n* Previous job titles\n* Actual responsibilities\n* Relevant projects\n* Professional achievements\n* Type of work performed\n* Complexity of previous work\n* Similarity to the target position\n\nProfessional experience is more important than simply matching keywords.\n\nExample:\n\nIf the JD requires:\n\n\"Build REST APIs using ASP.NET Core\"\n\nand the CV says:\n\n\"Built REST APIs using ASP.NET Core for production applications\"\n\nThis is a strong match.\n\nIf the CV only says:\n\n\"Worked with C#\"\n\nThis is NOT equivalent to ASP.NET Core API experience.\n\n---\n\n# STEP 4 — RESPONSIBILITIES MATCH — 20%\n\nCompare the candidate's demonstrated experience with the actual responsibilities listed in the JD.\n\nFor each major responsibility determine:\n\n* Strong Match\n* Partial Match\n* No Evidence\n\nFocus on whether the candidate has actually performed similar work.\n\nDo not give full credit simply because the candidate possesses related technical skills.\n\n---\n\n# STEP 5 — EDUCATION / QUALIFICATIONS — 10%\n\nEvaluate:\n\n* Degree\n* Field of study\n* Certifications\n* Required educational qualifications\n* Other mandatory qualifications\n\nIf the JD does not require education, do not penalize the candidate unnecessarily.\n\nIf the JD explicitly requires a specific qualification and the CV does not demonstrate it, reduce the score.\n\n---\n\n# STEP 6 — SENIORITY / EXPERIENCE — 10%\n\nCompare:\n\n* Required years of experience\n* Candidate's years of relevant experience\n* Seniority level\n* Previous role seniority\n* Scope of responsibility\n\nExample:\n\nIf the JD requires:\n\n\"3+ years of experience\"\n\nand the candidate clearly demonstrates 4 years of relevant experience:\n\n→ Strong match.\n\nIf the candidate demonstrates only 1 year:\n\n→ Significant gap.\n\nDo not count unrelated experience as relevant experience.\n\n---\n\n# STEP 7 — DOMAIN / INDUSTRY EXPERIENCE — 5%\n\nEvaluate whether the candidate has relevant experience in the same or closely related industry/domain.\n\nExamples:\n\n* FinTech\n* E-commerce\n* Healthcare\n* Real Estate\n* SaaS\n* Banking\n* Cybersecurity\n\nIf domain experience is not required by the JD, do not heavily penalize the candidate.\n\n---\n\n# CRITICAL RULE — MUST-HAVE REQUIREMENTS\n\nA candidate MUST NOT receive a high score simply because they match many secondary requirements.\n\nIf the candidate clearly fails a critical mandatory requirement, this must significantly affect the final score.\n\nFor every Must-Have requirement, classify it as:\n\n* MATCH\n* PARTIAL\n* NOT DEMONSTRATED\n\nA missing mandatory skill should be explicitly mentioned in the final reason.\n\nDo NOT invent experience.\n\nDo NOT assume experience.\n\nDo NOT infer skills that are not reasonably supported by the CV.\n\n---\n\n# SCORING SYSTEM\n\nFor each criterion, calculate a score from 0 to 100.\n\nThen calculate the weighted final score:\n\n```text\nFinal Score =\nTechnical Skills × 0.30\n+ Relevant Experience × 0.25\n+ Responsibilities Match × 0.20\n+ Qualifications × 0.10\n+ Seniority × 0.10\n+ Domain Experience × 0.05\n```\n\nThe final score must be a number between 0 and 100.\n\nRound the final score to the nearest whole number.\n\n---\n\n# STATUS CLASSIFICATION\n\nUse ONLY these four statuses:\n\n### 90–100\n\n`excellent`\n\n### 80–89\n\n`Strong`\n\n### 70–79\n\n`Weak`\n\n### 0–69\n\n`Failed`\n\nImportant:\n\nDo NOT choose the status first.\n\nCalculate the score first.\n\nThen assign the status according to the exact thresholds above.\n\n---\n\n# CONSISTENCY RULES\n\nTo make the evaluation independent of the AI model:\n\n1. Always use the same weighted scoring system.\n2. Always evaluate the same criteria.\n3. Always prioritize Must-Have requirements.\n4. Never invent missing information.\n5. Never reward keyword stuffing.\n6. Never penalize CV formatting.\n7. Never consider age, gender, nationality, religion, race, marital status, photo, or other protected/personal characteristics.\n8. Do not use writing quality as a qualification.\n9. Do not give a candidate a high score merely because they have many technologies listed.\n10. Evidence in the CV must support the score.\n11. If information is missing, mark it as \"Not Demonstrated\".\n12. Do not assume that similar technologies are equivalent.\n13. Distinguish between professional experience and academic/personal projects.\n14. Give higher weight to demonstrated professional experience.\n15. If the CV contains contradictory information, mention the contradiction instead of guessing.\n16. The same CV + same JD should produce approximately the same score regardless of which AI model performs the evaluation.\n\n---\n\n# PROFESSIONAL RECRUITER REASONING\n\nYour reason must explain **WHY** the candidate received the score.\n\nDo NOT write vague statements such as:\n\n\"Good candidate.\"\n\n\"Strong technical background.\"\n\n\"Seems suitable.\"\n\nInstead, mention specific evidence.\n\nFor example:\n\n\"Strong match because the candidate has 4 years of professional experience with React and TypeScript, which directly aligns with the core requirements of the position. The candidate also demonstrates experience building reusable UI components and integrating REST APIs. However, the CV does not demonstrate the required Next.js production experience, which prevents an Excellent rating.\"\n\nThe reason must contain:\n\n### Strengths\n\nWhat requirements the candidate clearly satisfies.\n\n### Gaps\n\nWhat requirements are missing or only partially demonstrated.\n\n### Overall Assessment\n\nWhy the final score and status are justified.\n\n---\n\n# OUTPUT FORMAT\n\nReturn ONLY valid JSON.\n\nDo NOT add Markdown.\n\nDo NOT add explanations outside the JSON.\n\nUse exactly this structure:\n\n{\n\"status\": \"excellent | Strong | Weak | Failed\",\n\"score\": 0,\n\"reason\": \"Professional explanation of why this score and status were assigned.\",\n\"strengths\": [\n\"Specific strength supported by the CV\",\n\"Specific strength supported by the CV\"\n],\n\"gaps\": [\n\"Specific missing or weak requirement\",\n\"Specific missing or weak requirement\"\n],\n\"must_have_requirements\": [\n{\n\"requirement\": \"Requirement from JD\",\n\"candidate_evidence\": \"Evidence from CV or Not Demonstrated\",\n\"match\": \"MATCH | PARTIAL | NOT DEMONSTRATED\"\n}\n],\n\"score_breakdown\": {\n\"technical_skills\": 0,\n\"relevant_experience\": 0,\n\"responsibilities_match\": 0,\n\"qualifications\": 0,\n\"seniority\": 0,\n\"domain_experience\": 0\n}\n}\n\n---\n\n# FINAL QUALITY CHECK\n\nBefore returning the JSON:\n\n1. Verify that the score is mathematically consistent with the weighted criteria.\n2. Verify that the status matches the score threshold.\n3. Verify that every major Must-Have requirement was evaluated.\n4. Verify that the reason explains the score.\n5. Verify that strengths are supported by the CV.\n6. Verify that gaps are supported by the JD/CV comparison.\n7. Verify that no information was invented.\n8. Verify that no protected/personal characteristics influenced the decision.\n9. Verify that the output is valid JSON.\n10. Return ONLY the JSON.\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "529baad2-e6af-40f9-a428-51362f8714d8",
+      "name": "Score Candidates Against JD1",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        1456,
+        3184
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"status\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"excellent\",\n        \"Strong\",\n        \"Weak\",\n        \"Failed\"\n      ]\n    },\n    \"score\": {\n      \"type\": \"number\",\n      \"minimum\": 0,\n      \"maximum\": 100\n    },\n    \"reason\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"status\",\n    \"score\",\n    \"reason\"\n  ],\n  \"additionalProperties\": false\n}"
+      },
+      "id": "5459a4bc-1870-4759-bf57-5e6085bc107a",
+      "name": "Structured Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        3376
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        3392
+      ],
+      "id": "e827a6b4-bb51-4e2f-bcc7-066628800e02",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "mmX3lBuFbUQHnOEh",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_9>",
+          "mode": "list",
+          "cachedResultName": "REDA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 82165406,
+          "mode": "list",
+          "cachedResultName": "الورقة3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit#gid=82165406"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('CV/Job').item.json.Email }}",
+            "Why": "={{ $json.output.reason }}",
+            "Status": "={{ $json.output.status }}",
+            "Score of 100": "={{ $json.output.score }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "FullName",
+              "displayName": "FullName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "JP",
+              "displayName": "JP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CV",
+              "displayName": "CV",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Why",
+              "displayName": "Why",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Responded",
+              "displayName": "Responded",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Score of 100",
+              "displayName": "Score of 100",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1824,
+        3184
+      ],
+      "id": "2d165cf7-2b9f-49b0-8e3a-effc998ca4aa",
+      "name": "Update Status/Why",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "=Wrong or Not Find JD",
+        "emailType": "text",
+        "message": "=not find JD: {{ $('Loop Over Items').item.json.JP }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1072,
+        3472
+      ],
+      "id": "d4160eff-91a7-4840-bad0-5c40995085e9",
+      "name": "Send a message1",
+      "webhookId": "c47dab59-4e58-4026-a8f8-6d7e428d4af0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yEixcOcUAXDP0bFE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -784,
+        3856
+      ],
+      "id": "5c770ed6-6ba8-4371-a1ee-2de90a6a6001",
+      "name": "Cleanup Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_9>",
+          "mode": "list",
+          "cachedResultName": "REDA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 82165406,
+          "mode": "list",
+          "cachedResultName": "الورقة3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit#gid=82165406"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -544,
+        3856
+      ],
+      "id": "25e04e14-da52-41d7-8317-8d021165ed75",
+      "name": "Read All Applications",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const status = ($json.Status || '').toString().trim();\nconst respondedRaw = $json.Responded;\nconst responded = respondedRaw === true || respondedRaw === 'TRUE' || respondedRaw === 'true';\nconst shouldDelete = (status === 'Failed' || status === 'Weak') && responded;\nreturn { json: { ...$json, shouldDelete } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        3856
+      ],
+      "id": "21455ff1-0fe7-4d3d-8856-3e294082f624",
+      "name": "Mark Rows To Delete"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "should-delete-check",
+              "leftValue": "={{ $json.shouldDelete }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -64,
+        3856
+      ],
+      "id": "1ed733fe-7ce2-48e8-a8ed-3dc0ea63feff",
+      "name": "Filter Rows To Delete"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "row_number",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        176,
+        3856
+      ],
+      "id": "e37bb6f2-d666-4693-ab15-a778d7920aa6",
+      "name": "Sort By Row Descending"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        416,
+        3856
+      ],
+      "id": "442b73a5-873e-4618-b7b5-4f6109388daf",
+      "name": "Loop Each Row"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_9>",
+          "mode": "list",
+          "cachedResultName": "REDA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 82165406,
+          "mode": "list",
+          "cachedResultName": "الورقة3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_9>/edit#gid=82165406"
+        },
+        "startIndex": "={{ $json.row_number }}"
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        864,
+        3872
+      ],
+      "id": "cda40193-b72d-4cb3-88c4-981c3447dc4e",
+      "name": "Delete rows or columns from sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Loop Each Row').item.json.CV }}",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1072,
+        3872
+      ],
+      "id": "c20706e0-8d21-4f01-87fe-205e7e496f08",
+      "name": "Delete a file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "DeojzxiEqVPnggRt",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        3392
+      ],
+      "id": "f9e46583-048d-4299-a5e2-8d4f8c038df8",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "27e3y8drNx1o0RQz",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        3872
+      ],
+      "id": "3be332b8-046a-417b-b812-c907ef06e78c",
+      "name": "Wait",
+      "webhookId": "e3485d9b-38b0-4a76-9325-d1acabb5c405"
+    }
+  ],
+  "pinData": {
+    "Job Application Form": [
+      {
+        "json": {
+          "Full Name": "Jane Doe",
+          "Email": "you@example.com",
+          "Job Position": "Frontend Developer",
+          "CV": {
+            "filename": "Jane_Doe_CV.pdf",
+            "mimetype": "application/pdf",
+            "size": 61919
+          },
+          "submittedAt": "2026-09-02T23:01:56.876+03:00",
+          "formMode": "test"
+        },
+        "binary": {
+          "CV": {
+            "mimeType": "application/pdf",
+            "fileType": "pdf",
+            "fileExtension": "pdf",
+            "data": "filesystem-v2",
+            "fileName": "Jane_Doe_CV.pdf",
+            "id": "filesystem-v2:workflows/myJwr8ITvVoMEA9o/executions/temp/binary_data/c5679741-e38d-4bab-a9cd-9e7e68798ba3",
+            "fileSize": "61.9 kB",
+            "bytes": 61919
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Job Application Form": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Email Format": {
+      "main": [
+        [
+          {
+            "node": "Add to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Email Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Check Email Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Under Reviewing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Under Reviewing": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get CV",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Job Discription1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get CV": {
+      "main": [
+        [
+          {
+            "node": "Extract CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JP": {
+      "main": [
+        [
+          {
+            "node": "Get Job Discription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Job Discription": {
+      "main": [
+        [
+          {
+            "node": "Get Job Discription1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract CV": {
+      "main": [
+        [
+          {
+            "node": "JP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Job Discription1": {
+      "main": [
+        [
+          {
+            "node": "Extract Job Discription",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Job Discription": {
+      "main": [
+        [
+          {
+            "node": "CV/Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Score Candidates Against JD1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CV/Job": {
+      "main": [
+        [
+          {
+            "node": "Score Candidates Against JD1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Score Candidates Against JD1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Candidates Against JD1": {
+      "main": [
+        [
+          {
+            "node": "Update Status/Why",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status/Why": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Cleanup Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read All Applications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read All Applications": {
+      "main": [
+        [
+          {
+            "node": "Mark Rows To Delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Rows To Delete": {
+      "main": [
+        [
+          {
+            "node": "Filter Rows To Delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Rows To Delete": {
+      "main": [
+        [
+          {
+            "node": "Sort By Row Descending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort By Row Descending": {
+      "main": [
+        [
+          {
+            "node": "Loop Each Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Each Row": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete rows or columns from sheet": {
+      "main": [
+        [
+          {
+            "node": "Delete a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a file": {
+      "main": [
+        [
+          {
+            "node": "Loop Each Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Score Candidates Against JD1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Delete rows or columns from sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a28e8100-a018-45cd-8814-371c26cd2ab7",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "myJwr8ITvVoMEA9o",
+  "tags": []
+}

@@ -1,0 +1,5724 @@
+{
+  "name": "ismail_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Merge').item.json.id }}"
+      },
+      "id": "19b8d300-fc00-4888-9cd8-a7d6482f7849",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        2720,
+        2048
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-safeguard-20b",
+        "options": {
+          "maxTokensToSample": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        2496,
+        2016
+      ],
+      "id": "a1bba3de-5602-4f96-9c47-4c72d653edac",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "3HzbBiHg6JL60EuH",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "557bf67f-a551-47ed-8ed9-385eb1431284",
+              "leftValue": "={{ $json.fields[\"الهاتف\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1312,
+        1760
+      ],
+      "id": "874d0603-5eb4-44a4-a3c6-591612bc4cff",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1856,
+        1760
+      ],
+      "id": "c2740c9c-610d-49e9-bc90-3d51f7fe9a8d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4032,
+        2032
+      ],
+      "id": "be27d094-c6e8-41f9-85f7-74ad73dfa8ad",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Restaurant Knowledge Base\n\nUse this tool whenever the user asks about:\n- restaurant name or info\n- menu\n- food\n- drinks\n- prices\n- delivery\n- opening hours\n- restaurant policies\n\nAlways search this knowledge base before answering.\nNever answer these questions from memory.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": 10,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        2864,
+        1968
+      ],
+      "id": "9b7be21b-5bea-4da0-a33b-c0cd61ed7092",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "rCkImGHxCBMhBipi",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2832,
+        2160
+      ],
+      "id": "b6a27a68-80a3-48b2-90d8-0f1dbe9dbf0e",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "whatsapp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        1760
+      ],
+      "id": "60f9e675-9c3c-4d14-bc0f-367052eefbbc",
+      "name": "Get Message",
+      "webhookId": "2b4441c9-e565-48e4-aa25-365beff01335",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"received\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -272,
+        1552
+      ],
+      "id": "a97d6583-9812-45ef-be08-793e649d065e",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "chunkSize": 1500,
+        "chunkOverlap": 300,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        3984,
+        3136
+      ],
+      "id": "84a41b67-f0aa-4531-b50e-45b62fc8f7d9",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "file_id",
+                "value": "={{ $('Edit Fields').item.json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        3888,
+        2992
+      ],
+      "id": "f3b4a1c3-f80c-4e18-b743-57040aa0a943",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "embeddingBatchSize": 20,
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        3792,
+        2784
+      ],
+      "id": "fabb16f5-d8d8-43b1-a830-c55db3c4a006",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "rCkImGHxCBMhBipi",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        3536,
+        2784
+      ],
+      "id": "7367f42a-dae3-4497-9908-23f8b182f342",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3312,
+        2784
+      ],
+      "id": "735efe4c-926c-4537-946a-31949d96ba79",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "eCyXjnbEdtYxIK9S",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4b1c7e65-15d5-407e-9c28-fcfb06baca71",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3088,
+        2784
+      ],
+      "id": "a3999e00-4361-47bb-b456-8d91bd66868d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "Restuarant_Knowlage",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/<GOOGLE_RESOURCE_ID_1>"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        2864,
+        2784
+      ],
+      "id": "c6d602d4-e0a0-4821-b400-6f110057c12f",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "eCyXjnbEdtYxIK9S",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.green-api.com/waInstance<GREEN_API_INSTANCE>/sendMessage/<GREEN_API_TOKEN>",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chatId\": \"<YOUR_WHATSAPP_ID>@c.us\",\n  \"message\": {{ JSON.stringify($('Merge2').item.json.message) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4896,
+        1888
+      ],
+      "id": "2835c694-9262-4265-a68b-2527030813d8",
+      "name": "Chat with lead",
+      "retryOnFail": true,
+      "executeOnce": false,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9edbd13d-659a-4a42-95f9-7c02c24fb446",
+              "leftValue": "={{ $('Code in JavaScript').item.json[\"العنوان\"] }}",
+              "rightValue": 69,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3440,
+        2032
+      ],
+      "id": "9faa6b53-0cc3-4500-91bf-4151c3c2ad78",
+      "name": "Full details?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c469fac8-8b18-448f-8c22-539cd6778415",
+              "leftValue": "={{ $('Code in JavaScript').item.json[\"الحاله\"] }}",
+              "rightValue": "طلب شراء",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3728,
+        1888
+      ],
+      "id": "d2afd288-2504-4437-bc06-757a35b2b1d3",
+      "name": "want to order?"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "filterByFormula": "=AND(\n    SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE({الهاتف}, \"(\", \"\"), \")\", \"\"), \"-\", \"\"), \" \", \"\") = '{{ $('get(phone and code and message)').item.json.phoneNumber }}'\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        1760
+      ],
+      "id": "e5a50e67-2c69-43b6-ba8a-19cfa75fd3df",
+      "name": "Get Customer",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "تاريخ التواصل الأول": "={{ $now.toFormat('yyyy-MM-dd') }}",
+            "الحالة": "لم يطلب",
+            "فتح الخط": "={{ $('get(phone and code and message)').item.json.countryCode }}",
+            "الهاتف": "={{ $('get(phone and code and message)').item.json.phoneNumber }}",
+            "مصدر العميل": "={{ $json.source }}",
+            "طلب زياره": "لم يطلب زياره",
+            "طرق التواصل": "واتس",
+            "الفتره": "={{ $json.shift }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "تاريخ التواصل الأول",
+              "displayName": "تاريخ التواصل الأول",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "فتح الخط",
+              "displayName": "فتح الخط",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "20",
+                  "value": "20"
+                },
+                {
+                  "name": "966",
+                  "value": "966"
+                },
+                {
+                  "name": "971",
+                  "value": "971"
+                },
+                {
+                  "name": "974",
+                  "value": "974"
+                },
+                {
+                  "name": "968",
+                  "value": "968"
+                },
+                {
+                  "name": "965",
+                  "value": "965"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الهاتف",
+              "displayName": "الهاتف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "سبب التواصل",
+              "displayName": "سبب التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "كرسي مساج صغير",
+                  "value": "كرسي مساج صغير"
+                },
+                {
+                  "name": "كرسي مساج متوسط",
+                  "value": "كرسي مساج متوسط"
+                },
+                {
+                  "name": "كرسي مساج كبير",
+                  "value": "كرسي مساج كبير"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الحالة",
+              "displayName": "الحالة",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب شراء",
+                  "value": "طلب شراء"
+                },
+                {
+                  "name": "لم يطلب",
+                  "value": "لم يطلب"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "مصدر العميل",
+              "displayName": "مصدر العميل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "فيس بوك",
+                  "value": "فيس بوك"
+                },
+                {
+                  "name": "تيك توك",
+                  "value": "تيك توك"
+                },
+                {
+                  "name": "سناب",
+                  "value": "سناب"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "خبير المبيعات",
+              "displayName": "خبير المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طلب زياره",
+              "displayName": "طلب زياره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب زياره",
+                  "value": "طلب زياره"
+                },
+                {
+                  "name": "لم يطلب زياره",
+                  "value": "لم يطلب زياره"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "طرق التواصل",
+              "displayName": "طرق التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "واتس",
+                  "value": "واتس"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "تليجرام",
+                  "value": "تليجرام"
+                },
+                {
+                  "name": "ماسنجر",
+                  "value": "ماسنجر"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الفتره",
+              "displayName": "الفتره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "الصباح",
+                  "value": "الصباح"
+                },
+                {
+                  "name": "المساء",
+                  "value": "المساء"
+                },
+                {
+                  "name": "الليل",
+                  "value": "الليل"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        1888
+      ],
+      "id": "2b0e6627-8650-44da-95c9-aab64885fa72",
+      "name": "Create Customer",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "الهاتف": "={{ $('Get Customer').item.json.fields[\"الهاتف\"] }}",
+            "تاريخ التواصل الأول": "={{ $now.toFormat('yyyy-MM-dd') }}",
+            "الحالة": "طلب شراء"
+          },
+          "matchingColumns": [
+            "الهاتف",
+            "تاريخ التواصل الأول"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "تاريخ التواصل الأول",
+              "displayName": "تاريخ التواصل الأول",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "فتح الخط",
+              "displayName": "فتح الخط",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "20",
+                  "value": "20"
+                },
+                {
+                  "name": "966",
+                  "value": "966"
+                },
+                {
+                  "name": "971",
+                  "value": "971"
+                },
+                {
+                  "name": "974",
+                  "value": "974"
+                },
+                {
+                  "name": "968",
+                  "value": "968"
+                },
+                {
+                  "name": "965",
+                  "value": "965"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                },
+                {
+                  "name": "91",
+                  "value": "91"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الهاتف",
+              "displayName": "الهاتف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "سبب التواصل",
+              "displayName": "سبب التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "كرسي مساعد صغير",
+                  "value": "كرسي مساعد صغير"
+                },
+                {
+                  "name": "كرسي مساعد متوسط",
+                  "value": "كرسي مساعد متوسط"
+                },
+                {
+                  "name": "كرسي مساعد كبير",
+                  "value": "كرسي مساعد كبير"
+                },
+                {
+                  "name": "كرسي مساج صغير",
+                  "value": "كرسي مساج صغير"
+                },
+                {
+                  "name": "كرسي مساج متوسط",
+                  "value": "كرسي مساج متوسط"
+                },
+                {
+                  "name": "كرسي مساج كبير",
+                  "value": "كرسي مساج كبير"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الحالة",
+              "displayName": "الحالة",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب شراء",
+                  "value": "طلب شراء"
+                },
+                {
+                  "name": "لم يطلب",
+                  "value": "لم يطلب"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "مصدر العميل",
+              "displayName": "مصدر العميل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "فيس بوك",
+                  "value": "فيس بوك"
+                },
+                {
+                  "name": "تيك توك",
+                  "value": "تيك توك"
+                },
+                {
+                  "name": "سناب",
+                  "value": "سناب"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "organic",
+                  "value": "organic"
+                },
+                {
+                  "name": "whatsapp",
+                  "value": "whatsapp"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "خبير المبيعات",
+              "displayName": "خبير المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طلب زياره",
+              "displayName": "طلب زياره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب زيارة",
+                  "value": "طلب زيارة"
+                },
+                {
+                  "name": "لم يطلب زيارة",
+                  "value": "لم يطلب زيارة"
+                },
+                {
+                  "name": "لم يطلب زياره",
+                  "value": "لم يطلب زياره"
+                },
+                {
+                  "name": "طلب زياره",
+                  "value": "طلب زياره"
+                },
+                {
+                  "name": "لم طلب زياره",
+                  "value": "لم طلب زياره"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طرق التواصل",
+              "displayName": "طرق التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "واتس",
+                  "value": "واتس"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "تليجرام",
+                  "value": "تليجرام"
+                },
+                {
+                  "name": "ماسنجر",
+                  "value": "ماسنجر"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الفتره",
+              "displayName": "الفتره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "الصباح",
+                  "value": "الصباح"
+                },
+                {
+                  "name": "المساء",
+                  "value": "المساء"
+                },
+                {
+                  "name": "الليل",
+                  "value": "الليل"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "تاريخ التواصل الاخير",
+              "displayName": "تاريخ التواصل الاخير",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        4032,
+        1760
+      ],
+      "id": "f4cbc452-7d0f-4cfc-af54-de9195f6d7b6",
+      "name": "Update (حاله الطلب)",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "تاريخ التواصل الأول": "={{ $now.toFormat('yyyy-MM-dd') }}",
+            "الحالة": "لم يطلب"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "تاريخ التواصل الأول",
+              "displayName": "تاريخ التواصل الأول",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "فتح الخط",
+              "displayName": "فتح الخط",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "20",
+                  "value": "20"
+                },
+                {
+                  "name": "966",
+                  "value": "966"
+                },
+                {
+                  "name": "971",
+                  "value": "971"
+                },
+                {
+                  "name": "974",
+                  "value": "974"
+                },
+                {
+                  "name": "968",
+                  "value": "968"
+                },
+                {
+                  "name": "965",
+                  "value": "965"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الهاتف",
+              "displayName": "الهاتف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "سبب التواصل",
+              "displayName": "سبب التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "كرسي مساج صغير",
+                  "value": "كرسي مساج صغير"
+                },
+                {
+                  "name": "كرسي مساج متوسط",
+                  "value": "كرسي مساج متوسط"
+                },
+                {
+                  "name": "كرسي مساج كبير",
+                  "value": "كرسي مساج كبير"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الحالة",
+              "displayName": "الحالة",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب شراء",
+                  "value": "طلب شراء"
+                },
+                {
+                  "name": "لم يطلب",
+                  "value": "لم يطلب"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "مصدر العميل",
+              "displayName": "مصدر العميل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "فيس بوك",
+                  "value": "فيس بوك"
+                },
+                {
+                  "name": "تيك توك",
+                  "value": "تيك توك"
+                },
+                {
+                  "name": "سناب",
+                  "value": "سناب"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "خبير المبيعات",
+              "displayName": "خبير المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طلب زياره",
+              "displayName": "طلب زياره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب زياره",
+                  "value": "طلب زياره"
+                },
+                {
+                  "name": "لم يطلب زياره",
+                  "value": "لم يطلب زياره"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طرق التواصل",
+              "displayName": "طرق التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "واتس",
+                  "value": "واتس"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "تليجرام",
+                  "value": "تليجرام"
+                },
+                {
+                  "name": "ماسنجر",
+                  "value": "ماسنجر"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        5168,
+        2032
+      ],
+      "id": "ecec0fdf-eb93-45d5-9cdf-97508a82717b",
+      "name": "Add Failed Messages",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "d",
+        "text": "d",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5488,
+        2032
+      ],
+      "id": "069950a5-3569-43d3-985f-defdd4cf2503",
+      "name": "sent failed message",
+      "webhookId": "e99d29c6-a999-468a-b3fa-055b6da6739d",
+      "credentials": {
+        "telegramApi": {
+          "id": "a4ZeIOgzk4LAy8J7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "59a7d3e7-7640-47ac-9b36-1fd2c0c648a0",
+              "name": "message",
+              "value": "={{ $('Code in JavaScript').item.json['الرساله'] }}\n\nالهاتف : {{ $json.fields[\"الهاتف\"] }} \nالعنوان :{{ $('Code in JavaScript').item.json['العنوان'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        4352,
+        1760
+      ],
+      "id": "ea448e61-2af6-45fd-8da8-3020ee7346c0",
+      "name": "buy message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b3110754-763b-4608-86fa-5ae712144d04",
+              "name": "message",
+              "value": "={{ $('Code in JavaScript').item.json[\"الرساله\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        4352,
+        2032
+      ],
+      "id": "a3cd4efa-4798-47e9-9626-7ad6127f42bd",
+      "name": "normal message"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4656,
+        1888
+      ],
+      "id": "ca8ff22e-3988-45f7-9372-cca73e2e7eee",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 416,
+        "width": 800,
+        "color": "#51CDD6"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        752,
+        2832
+      ],
+      "id": "3276db60-34ab-4a84-84d7-d01cc153bea6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 464,
+        "width": 1264,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2864,
+        2784
+      ],
+      "id": "66fb8732-f0b4-45bb-9ce5-0fbd9664eaeb",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 512,
+        "width": 848,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2416,
+        1776
+      ],
+      "id": "57c8ed0e-8070-49a7-86c8-31986ef289d4",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 272,
+        "width": 1072,
+        "color": "#2E1414"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        768,
+        1744
+      ],
+      "id": "f5fc8f43-02bf-4d34-bb0c-b56f7e66b03e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 128,
+        "width": 448,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4000,
+        1760
+      ],
+      "id": "bc411b19-9639-4071-9769-82abbda9e152",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 128,
+        "width": 432,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4016,
+        2032
+      ],
+      "id": "91eb9a0f-eb22-4a7e-870b-ba2f333049a2",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 144,
+        "width": 528,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5136,
+        2032
+      ],
+      "id": "c07362be-9d37-423d-929a-6f0b059e4c25",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "تاريخ التواصل الأول": "={{ $now.toFormat('yyyy-MM-dd') }}",
+            "الحالة": "لم يطلب"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "تاريخ التواصل الأول",
+              "displayName": "تاريخ التواصل الأول",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "فتح الخط",
+              "displayName": "فتح الخط",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "20",
+                  "value": "20"
+                },
+                {
+                  "name": "966",
+                  "value": "966"
+                },
+                {
+                  "name": "971",
+                  "value": "971"
+                },
+                {
+                  "name": "974",
+                  "value": "974"
+                },
+                {
+                  "name": "968",
+                  "value": "968"
+                },
+                {
+                  "name": "965",
+                  "value": "965"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الهاتف",
+              "displayName": "الهاتف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "سبب التواصل",
+              "displayName": "سبب التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "كرسي مساج صغير",
+                  "value": "كرسي مساج صغير"
+                },
+                {
+                  "name": "كرسي مساج متوسط",
+                  "value": "كرسي مساج متوسط"
+                },
+                {
+                  "name": "كرسي مساج كبير",
+                  "value": "كرسي مساج كبير"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الحالة",
+              "displayName": "الحالة",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب شراء",
+                  "value": "طلب شراء"
+                },
+                {
+                  "name": "لم يطلب",
+                  "value": "لم يطلب"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "مصدر العميل",
+              "displayName": "مصدر العميل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "فيس بوك",
+                  "value": "فيس بوك"
+                },
+                {
+                  "name": "تيك توك",
+                  "value": "تيك توك"
+                },
+                {
+                  "name": "سناب",
+                  "value": "سناب"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "خبير المبيعات",
+              "displayName": "خبير المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طلب زياره",
+              "displayName": "طلب زياره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب زياره",
+                  "value": "طلب زياره"
+                },
+                {
+                  "name": "لم يطلب زياره",
+                  "value": "لم يطلب زياره"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طرق التواصل",
+              "displayName": "طرق التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "واتس",
+                  "value": "واتس"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "تليجرام",
+                  "value": "تليجرام"
+                },
+                {
+                  "name": "ماسنجر",
+                  "value": "ماسنجر"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -272,
+        2064
+      ],
+      "id": "053b831f-9483-4629-92b3-9c91b30eb50a",
+      "name": "Add Failed Messages1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "d",
+        "text": "d",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        2064
+      ],
+      "id": "c2a0ae62-0f4a-4d1f-baa5-a5417783a370",
+      "name": "sent failed message1",
+      "webhookId": "6c6163e9-2354-462b-8faf-f49f07539900",
+      "credentials": {
+        "telegramApi": {
+          "id": "a4ZeIOgzk4LAy8J7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 144,
+        "width": 448,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        2064
+      ],
+      "id": "064a6f64-da44-43eb-8083-a8a8864e5c6c",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.output;\n\nconst cleaned = String(raw)\n  .replace(/```json/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\ntry {\n  return [{ json: JSON.parse(cleaned) }];\n} catch (error) {\n  throw new Error(\n    'AI returned invalid/incomplete JSON.\\n\\nAI Output:\\n' + cleaned\n  );\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        1792
+      ],
+      "id": "152f1c75-bda4-43f4-ac1c-919c17f6bb48",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "formTitle": "Add info",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "فتح الخط",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "20"
+                  },
+                  {
+                    "option": "966"
+                  },
+                  {
+                    "option": "971"
+                  },
+                  {
+                    "option": "974"
+                  },
+                  {
+                    "option": "968"
+                  },
+                  {
+                    "option": "965"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "الهاتف"
+            },
+            {
+              "fieldLabel": "مصدر العميل",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "فيس بوك"
+                  },
+                  {
+                    "option": "انستا"
+                  },
+                  {
+                    "option": "تيك توك"
+                  },
+                  {
+                    "option": "سناب"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "طلب الزياره",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "طلب زياره"
+                  },
+                  {
+                    "option": "لم طلب زياره"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "سبب التواصل؟",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "كرسي مساج صغير"
+                  },
+                  {
+                    "option": "كرسي مساج كبير"
+                  },
+                  {
+                    "option": "كرسي مساج متوسط"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "الحاله",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "لم يطلب"
+                  },
+                  {
+                    "option": "طلب شراء"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "الفتره",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "الصباح"
+                  },
+                  {
+                    "option": "المساء"
+                  },
+                  {
+                    "option": "الليل"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "طرق التواصل",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "واتس"
+                  },
+                  {
+                    "option": "تليجرام"
+                  },
+                  {
+                    "option": "ماسنجر"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        2848,
+        2496
+      ],
+      "id": "135ba4ca-80cd-4853-a1a2-f25b42635905",
+      "name": "On form submission",
+      "webhookId": "e7516e0f-9ab7-4bbb-8d68-c267cd8ce410"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "557bf67f-a551-47ed-8ed9-385eb1431284",
+              "leftValue": "={{ $json[\"الهاتف\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3728,
+        2496
+      ],
+      "id": "16c47b1f-72bd-48e3-b08f-d0ca68a31adf",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "filterByFormula": "=AND(\n    SUBSTITUTE(SUBSTITUTE(SUBSTITUTE(SUBSTITUTE({الهاتف}, \"(\", \"\"), \")\", \"\"), \"-\", \"\"), \" \", \"\") = '{{ $json[\"الهاتف\"] }}'\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        3072,
+        2496
+      ],
+      "id": "db710e05-0738-4891-b3aa-a1be3d5aa66a",
+      "name": "Get Customer1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "تاريخ التواصل الأول": "={{ $now.toFormat('yyyy-MM-dd') }}",
+            "الحالة": "={{ $('On form submission').item.json[\"الحاله\"] }}",
+            "فتح الخط": "={{ $('On form submission').item.json[\"فتح الخط\"] }}",
+            "الهاتف": "={{ $('On form submission').item.json[\"الهاتف\"] }}",
+            "مصدر العميل": "={{ $('On form submission').item.json[\"مصدر العميل\"] }}",
+            "طلب زياره": "={{ $('On form submission').item.json[\"طلب الزياره\"] }}",
+            "طرق التواصل": "={{ $('On form submission').item.json[\"طرق التواصل\"] }}",
+            "الفتره": "={{ $('On form submission').item.json[\"الفتره\"] }}",
+            "تاريخ التواصل الاخير": "={{ $now.toFormat('HH:mm') }}",
+            "سبب التواصل": "={{ $('On form submission').item.json[\"سبب التواصل؟\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "تاريخ التواصل الأول",
+              "displayName": "تاريخ التواصل الأول",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "فتح الخط",
+              "displayName": "فتح الخط",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "20",
+                  "value": "20"
+                },
+                {
+                  "name": "966",
+                  "value": "966"
+                },
+                {
+                  "name": "971",
+                  "value": "971"
+                },
+                {
+                  "name": "974",
+                  "value": "974"
+                },
+                {
+                  "name": "968",
+                  "value": "968"
+                },
+                {
+                  "name": "965",
+                  "value": "965"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الهاتف",
+              "displayName": "الهاتف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "سبب التواصل",
+              "displayName": "سبب التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "كرسي مساعد صغير",
+                  "value": "كرسي مساعد صغير"
+                },
+                {
+                  "name": "كرسي مساعد متوسط",
+                  "value": "كرسي مساعد متوسط"
+                },
+                {
+                  "name": "كرسي مساعد كبير",
+                  "value": "كرسي مساعد كبير"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الحالة",
+              "displayName": "الحالة",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب شراء",
+                  "value": "طلب شراء"
+                },
+                {
+                  "name": "لم يطلب",
+                  "value": "لم يطلب"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "مصدر العميل",
+              "displayName": "مصدر العميل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "فيس بوك",
+                  "value": "فيس بوك"
+                },
+                {
+                  "name": "تيك توك",
+                  "value": "تيك توك"
+                },
+                {
+                  "name": "سناب",
+                  "value": "سناب"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "organic",
+                  "value": "organic"
+                },
+                {
+                  "name": "whatsapp",
+                  "value": "whatsapp"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "خبير المبيعات",
+              "displayName": "خبير المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طلب زياره",
+              "displayName": "طلب زياره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب زيارة",
+                  "value": "طلب زيارة"
+                },
+                {
+                  "name": "لم يطلب زيارة",
+                  "value": "لم يطلب زيارة"
+                },
+                {
+                  "name": "لم يطلب زياره",
+                  "value": "لم يطلب زياره"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "طرق التواصل",
+              "displayName": "طرق التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "واتس",
+                  "value": "واتس"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "تليجرام",
+                  "value": "تليجرام"
+                },
+                {
+                  "name": "ماسنجر",
+                  "value": "ماسنجر"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الفتره",
+              "displayName": "الفتره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "الصباح",
+                  "value": "الصباح"
+                },
+                {
+                  "name": "المساء",
+                  "value": "المساء"
+                },
+                {
+                  "name": "الليل",
+                  "value": "الليل"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "تاريخ التواصل الاخير",
+              "displayName": "تاريخ التواصل الاخير",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        4032,
+        2592
+      ],
+      "id": "a37f03a1-53c7-46a6-9f6d-a7d0fd1c73b1",
+      "name": "Create Customer1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5b9770b3-2b74-4a0a-a19c-2c2edf184212",
+              "name": "الهاتف",
+              "value": "={{ $json.fields[\"الهاتف\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3520,
+        2496
+      ],
+      "id": "54201ba7-7a4b-49df-9759-3848d2b69d2f",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "الهاتف": "={{ $json[\"الهاتف\"] }}",
+            "تاريخ التواصل الأول": "={{ $now.toFormat('yyyy-MM-dd') }}",
+            "سبب التواصل": "={{ $('On form submission').item.json[\"سبب التواصل؟\"] }}",
+            "الحالة": "={{ $('On form submission').item.json[\"الحاله\"] }}",
+            "طلب زياره": "={{ $('On form submission').item.json[\"طلب الزياره\"] }}",
+            "تاريخ التواصل الاخير": "={{ $now.toFormat('HH:mm') }}"
+          },
+          "matchingColumns": [
+            "الهاتف",
+            "تاريخ التواصل الأول"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "تاريخ التواصل الأول",
+              "displayName": "تاريخ التواصل الأول",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "فتح الخط",
+              "displayName": "فتح الخط",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "20",
+                  "value": "20"
+                },
+                {
+                  "name": "966",
+                  "value": "966"
+                },
+                {
+                  "name": "971",
+                  "value": "971"
+                },
+                {
+                  "name": "974",
+                  "value": "974"
+                },
+                {
+                  "name": "968",
+                  "value": "968"
+                },
+                {
+                  "name": "965",
+                  "value": "965"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الهاتف",
+              "displayName": "الهاتف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "سبب التواصل",
+              "displayName": "سبب التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "كرسي مساعد صغير",
+                  "value": "كرسي مساعد صغير"
+                },
+                {
+                  "name": "كرسي مساعد متوسط",
+                  "value": "كرسي مساعد متوسط"
+                },
+                {
+                  "name": "كرسي مساعد كبير",
+                  "value": "كرسي مساعد كبير"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الحالة",
+              "displayName": "الحالة",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب شراء",
+                  "value": "طلب شراء"
+                },
+                {
+                  "name": "لم يطلب",
+                  "value": "لم يطلب"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "مصدر العميل",
+              "displayName": "مصدر العميل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "فيس بوك",
+                  "value": "فيس بوك"
+                },
+                {
+                  "name": "تيك توك",
+                  "value": "تيك توك"
+                },
+                {
+                  "name": "سناب",
+                  "value": "سناب"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "organic",
+                  "value": "organic"
+                },
+                {
+                  "name": "whatsapp",
+                  "value": "whatsapp"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "خبير المبيعات",
+              "displayName": "خبير المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طلب زياره",
+              "displayName": "طلب زياره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب زيارة",
+                  "value": "طلب زيارة"
+                },
+                {
+                  "name": "لم يطلب زيارة",
+                  "value": "لم يطلب زيارة"
+                },
+                {
+                  "name": "لم يطلب زياره",
+                  "value": "لم يطلب زياره"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "طرق التواصل",
+              "displayName": "طرق التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "واتس",
+                  "value": "واتس"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "تليجرام",
+                  "value": "تليجرام"
+                },
+                {
+                  "name": "ماسنجر",
+                  "value": "ماسنجر"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الفتره",
+              "displayName": "الفتره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "الصباح",
+                  "value": "الصباح"
+                },
+                {
+                  "name": "المساء",
+                  "value": "المساء"
+                },
+                {
+                  "name": "الليل",
+                  "value": "الليل"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "تاريخ التواصل الاخير",
+              "displayName": "تاريخ التواصل الاخير",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        4032,
+        2400
+      ],
+      "id": "481c3209-91c2-4735-b1b4-2c0ba677a9c6",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 320,
+        "width": 1392
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2816,
+        2384
+      ],
+      "id": "7e8e40e4-8349-4cd6-8f78-2e00313b402a",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "jsCode": "const countryCodes = [\n  '971','966','973','974','965','968','962','963','964','967','970','961',\n  '249','218','216','213','212','222','223','224','225','226','227','228',\n  '20','30','31','32','33','34','36','39','40','41','43','44','45','46',\n  '47','48','49','51','52','53','54','55','56','57','58','60','61','62',\n  '63','64','65','66','81','82','84','86','90','91','92','93','94','95',\n  '98','1','7'\n];\n\n// أطول Country Code الأول\nconst sortedCodes = [...countryCodes].sort((a, b) => b.length - a.length);\n\nfunction getShift() {\n  const cairoTime = new Date().toLocaleString('en-US', {\n    timeZone: 'Africa/Cairo'\n  });\n  const hour = new Date(cairoTime).getHours();\n  if (hour >= 8 && hour < 14) {\n    return 'الصباح';\n  }\n  if (hour >= 14 && hour < 18) {\n    return 'المساء';\n  }\n  if (hour >= 18 && hour < 22) {\n    return 'الليل';\n  }\n  return 'الليل';\n}\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const body = item.json?.body || {};\n\n  // =========================\n  // Sender Data\n  // =========================\n  const senderData = body.senderData || {};\n  const chatId = senderData.chatId || '';\n  const sender = senderData.sender || '';\n\n  // هل الرسالة من Group؟\n  const isGroup = chatId.endsWith('@g.us');\n  item.json.isGroup = isGroup;\n\n  // تجاهل رسائل الجروبات بالكامل\n  if (isGroup) {\n    continue;\n  }\n\n  // =========================\n  // Get Customer Number\n  // =========================\n  /*\n    Normal WhatsApp:\n    chatId = <YOUR_WHATSAPP_ID>@c.us\n  */\n  const phoneId = chatId;\n\n  if (!phoneId) {\n    item.json.countryCode = '';\n    item.json.phoneNumber = '';\n  } else {\n    const raw = phoneId\n      .replace('@c.us', '')\n      .replace('@g.us', '');\n\n    const matched = sortedCodes.find(code =>\n      raw.startsWith(code)\n    );\n\n    if (matched) {\n      item.json.countryCode = matched;\n      item.json.phoneNumber =\n        raw.substring(matched.length);\n    } else {\n      item.json.countryCode = '';\n      item.json.phoneNumber = raw;\n    }\n  }\n\n  // =========================\n  // Message Data\n  // =========================\n  const messageData = body.messageData || {};\n  const extData =\n    messageData.extendedTextMessageData || {};\n\n  // =========================\n  // Source\n  // =========================\n  item.json.source = 'whatsapp';\n\n  // =========================\n  // Ad Title\n  // =========================\n  item.json.adTitle =\n    extData.title || '';\n\n  // =========================\n  // Shift\n  // =========================\n  item.json.shift = getShift();\n\n  // =========================\n  // Return\n  // =========================\n  results.push(item);\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        1776
+      ],
+      "id": "f29af0dd-b22d-47db-91e1-53916d414d56",
+      "name": "get(phone and code and message)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=رسالة العميل:\n{{ $('get(phone and code and message)').item.json.body.messageData.extendedTextMessageData.text }}\n\n\nاسم العميل:\n{{ $('Get Message').item.json.body.senderData.senderName }}\n\n\nاستخدم بيانات العميل الحالية مع المحادثة السابقة وقاعدة المعرفة لاتخاذ القرار والرد.",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "أنت مساعد مبيعات وخدمة عملاء لشركة منتجات رياضية.\n\nمهمتك:\n- الرد على العملاء بشكل طبيعي واحترافي ومختصر.\n- مساعدة العميل في معرفة المنتجات والأسعار والشراء والزيارة.\n- استخدم نفس لغة العميل. إذا كان العميل عربيًا، تحدث بالعربية. وإذا كان إنجليزيًا، تحدث بالإنجليزية.\n- لا تخترع أي معلومة عن الشركة أو المنتجات أو الأسعار.\n- استخدم Supabase Vector Store للحصول على معلومات الشركة والمنتجات عند الحاجة.\n\nبيانات العميل الحالية والسابقة يتم تمريرها مع رسالة المستخدم.\n\nيجب أن تعتمد على البيانات الموجودة لتحديد حالة الـ Lead وتحديثها عند الحاجة.\n\nالقيم المطلوبة في النتيجة هي:\n\"الرساله\"\n\"سبب التواصل\"\n\"طلب زياره\"\n\"الحاله\"\n\"العنوان\"\n\nالقواعد:\n\n1. لا تسأل العميل عن معلومات موجودة بالفعل في بيانات الـ Lead.\n2. إذا كانت معلومات العميل ناقصة، اسأل فقط عن المعلومة المطلوبة.\n3. لا تسأل العميل عن كل البيانات مرة واحدة.\n4. إذا ظهر أن العميل مهتم بالشراء، تعامل معه بطريقة طبيعية واحترافية ومختصرة.\n5. إذا طلب العميل زيارة، تعامل مع طلب الزيارة حسب البيانات والقواعد الموجودة.\n6. لا تؤكد أي معلومة عن منتج أو سعر أو زيارة إلا إذا كانت معروفة من البيانات أو من قاعدة المعرفة.\n7. تحدث مع العميل بنفس لغته وبأسلوب طبيعي ومحترم.\n8. لا تعرض للعميل أي JSON أو بيانات داخلية أو أسماء أدوات أو تفاصيل النظام.\n9. لا تغير بيانات الـ Lead بدون سبب واضح من المحادثة.\n10. استخدم البيانات الحالية والسابقة معًا عند تحديد حالة العميل.\n11. إذا وجدت بيانات جديدة من المحادثة، استخدمها بدل البيانات القديمة.\n12. لا تخترع أي بيانات.\n13. إذا كانت المعلومة غير معروفة استخدم null.\n14. لا تسأل عن معلومة موجودة بالفعل.\n15. إذا كان العميل مهتمًا، استمر في المحادثة بشكل طبيعي ومختصر.\n\nالمنتجات والأسعار:\n\n- كرسي مساعد صغير: 1000\n- كرسي مساعد متوسط: 2000\n- كرسي مساعد كبير: 3000\n\nإذا كانت قيمة \"سعر المنتج\" موجودة في قاعدة المعرفة، استخدمها كما هي.\n\nإذا كان العميل يسأل عن سعر منتج غير موجود في المعلومات المتاحة، لا تخترع سعرًا.\n\nسبب التواصل يجب أن يكون واحدًا فقط من:\n- كرسي مساعد صغير\n- كرسي مساعد متوسط\n- كرسي مساعد كبير\n\nالحاله يجب أن يكون واحدًا فقط من:\n- طلب شراء\n-لم طلب \n\n\nإذا لم يتم تحديد المنتج ، اجعل \"سبب التواصل\": null.\n\nالقيمة الافتراضية لحقل \"طلب زيارة\" هي:\n\"لم يطلب زيارة\"\n\nإذا طلب العميل زيارة اجعلها \"طلب زيارة\"=\"طلب زيارة\" ، لا تعتبر ذلك تأكيدًا نهائيًا للزيارة إلا بعد استكمال الخطوات المطلوبة.\n\nقواعد الشراء:\n\n1. اسأل العميل بشكل صريح عن رغبته في الشراء/الطلب.\n2. اسأله عن البيانات المطلوبة لإتمام الطلب.\n3. أرسل رسالة تأكيد تحتوي على الاسم والعنوان والمنتج وطلب التأكيد.\n4. العميل يجب أن يوافق صراحة على رسالة التأكيد.\n5.يجب بعد الطلب فقط اجعل \n\"الحاله\" = \"طلب شراء\".\n6. لا تعتبر كلمة أو سؤالًا عابرًا تأكيدًا نهائيًا للطلب.\n\nاستخدم Supabase Vector Store للحصول على بيانات الشركة والمنتجات والأسعار والمعلومات التي تحتاجها للإجابة.\n\nلا تعتمد على التخمين أو المعرفة العامة إذا كانت المعلومة تخص الشركة أو منتجاتها.\n\nإذا لم تجد المعلومة في قاعدة المعرفة، أخبر العميل أن المعلومة غير متوفرة حاليًا بدل اختراع إجابة.\n\nالإخراج النهائي:\n\nيجب أن يكون الإخراج JSON فقط.\n\nبدون Markdown.\nبدون ```json.\nبدون أي نص قبل أو بعد JSON.\n\nيجب أن يحتوي JSON على الحقول التالية فقط:\n\n{\n  \"الرساله\": \"...\",\n  \"سبب التواصل\": \"you put the result\",\n  \"طلب زيارة\": \"لم يطلب زيارة\",\n  \"الحاله\": \"you put the result \",\n  \"العنوان\": null\n}\n\nاستخدم القيم المستخرجة من المحادثة وقاعدة المعرفة فقط.\n\nلا تضف حقولًا أخرى إذا لم تكن مطلوبة.\n\nيجب أن يكون JSON كاملًا وصحيحًا دائمًا.\nلا تقطع JSON أو تتوقف قبل إغلاق جميع الأقواس."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2672,
+        1792
+      ],
+      "id": "c902ba1b-b7cc-4bc5-9f89-04d2e59b4838",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2576,
+        2128
+      ],
+      "id": "4fe8f14d-cd6f-48f7-b41b-0425e8ce4862",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "OkV4n4C9w2J60QbB",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const RPM_LIMIT = 30; // ← غيّرها لحد الـ RPM الفعلي بتاع خطتك\nconst minGapMs = 60000 / RPM_LIMIT;\n\nconst record = $('RateLimiter').item.json;\nconst lastCall = record?.fields?.timestamp || 0;\nconst now = Date.now();\n\nconst elapsed = now - lastCall;\nconst waitMs = Math.max(0, minGapMs - elapsed);\n\nreturn [{\n  json: {\n    ...$('Merge').item.json,\n    recordId: record.id, // مهم عشان نحدث نفس السجل بعدين\n    waitSeconds: waitMs / 1000,\n    reservedTime: now + waitMs\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        1760
+      ],
+      "id": "ae23ace1-4b5a-42c7-be1f-9f9352f9d1c4",
+      "name": "Calculate Time to wait"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.waitSeconds }}",
+        "unit": "=seconds"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2048,
+        1968
+      ],
+      "id": "56808b78-ac81-460d-8894-01b93be9519a",
+      "name": "Wait1",
+      "webhookId": "f2617742-a2be-44ff-bb35-af0615b98d65"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "RateLimiter",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_2>"
+        },
+        "filterByFormula": "{key} = \"last_call\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2048,
+        1760
+      ],
+      "id": "1dcf9ba5-0ec8-4a08-9e05-b57238ebc3e5",
+      "name": "RateLimiter",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 336,
+        "width": 358,
+        "color": "#8F5656"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        1760
+      ],
+      "id": "a4ea5f74-3cd0-4af0-9169-7defa5fe832d",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "ProcessedMessages",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_3>"
+        },
+        "filterByFormula": "={idMessage} = \"{{ $('Get Message').item.json.body.idMessage }}\"",
+        "returnAll": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        1776
+      ],
+      "id": "b8f49ffd-6361-4bc3-8ad2-94e28f058d89",
+      "name": "ProcessedMessages",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        560,
+        1920
+      ],
+      "id": "fc571faf-cd59-4ab6-86e5-9a6d85800a43",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "ProcessedMessages",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_3>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "idMessage": "={{ $('get(phone and code and message)').item.json.body.idMessage }}",
+            "processedAt": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "idMessage",
+              "displayName": "idMessage",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "processedAt",
+              "displayName": "processedAt",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        1760
+      ],
+      "id": "e86524fb-8945-4cbf-93f6-991031aa7ed0",
+      "name": "Create a record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 272,
+        "width": 640,
+        "color": "#46957D"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        1744
+      ],
+      "id": "211f9e90-3e57-4be5-93c7-a21f881acdae",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c37a9313-9bd4-40d0-91ab-360adc569553",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        288,
+        1776
+      ],
+      "id": "70e46740-a4ac-44b7-b92d-2f64b4935a7b",
+      "name": "IF not Duplecated?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "RateLimiter",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_2>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.recordId }}",
+            "timestamp": "={{ $json.reservedTime }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2288,
+        1968
+      ],
+      "id": "42c55304-726c-4406-a305-ce68fc534418",
+      "name": "Update reservedTime",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "الهاتف": "={{ $('get(phone and code and message)').item.json.phoneNumber }}",
+            "طلب زياره": "={{ $json[\"طلب زيارة\"] }}",
+            "تاريخ التواصل الاخير": "={{ $now.toFormat('HH:mm') }}",
+            "تاريخ التواصل الأول": "={{ $now.toFormat('yyyy-MM-dd') }}",
+            "سبب التواصل": "={{ \n  $json[\"سبب التواصل\"] != null && $json[\"سبب التواصل\"] !== \"\"\n    ? $json[\"سبب التواصل\"]\n    : undefined\n}}"
+          },
+          "matchingColumns": [
+            "الهاتف",
+            "تاريخ التواصل الأول"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "تاريخ التواصل الأول",
+              "displayName": "تاريخ التواصل الأول",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "فتح الخط",
+              "displayName": "فتح الخط",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "20",
+                  "value": "20"
+                },
+                {
+                  "name": "966",
+                  "value": "966"
+                },
+                {
+                  "name": "971",
+                  "value": "971"
+                },
+                {
+                  "name": "974",
+                  "value": "974"
+                },
+                {
+                  "name": "968",
+                  "value": "968"
+                },
+                {
+                  "name": "965",
+                  "value": "965"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الهاتف",
+              "displayName": "الهاتف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "سبب التواصل",
+              "displayName": "سبب التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "كرسي مساعد صغير",
+                  "value": "كرسي مساعد صغير"
+                },
+                {
+                  "name": "كرسي مساعد متوسط",
+                  "value": "كرسي مساعد متوسط"
+                },
+                {
+                  "name": "كرسي مساعد كبير",
+                  "value": "كرسي مساعد كبير"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الحالة",
+              "displayName": "الحالة",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب شراء",
+                  "value": "طلب شراء"
+                },
+                {
+                  "name": "لم يطلب",
+                  "value": "لم يطلب"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "مصدر العميل",
+              "displayName": "مصدر العميل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "فيس بوك",
+                  "value": "فيس بوك"
+                },
+                {
+                  "name": "تيك توك",
+                  "value": "تيك توك"
+                },
+                {
+                  "name": "سناب",
+                  "value": "سناب"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "organic",
+                  "value": "organic"
+                },
+                {
+                  "name": "whatsapp",
+                  "value": "whatsapp"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "خبير المبيعات",
+              "displayName": "خبير المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "طلب زياره",
+              "displayName": "طلب زياره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "طلب زيارة",
+                  "value": "طلب زيارة"
+                },
+                {
+                  "name": "لم يطلب زيارة",
+                  "value": "لم يطلب زيارة"
+                },
+                {
+                  "name": "لم يطلب زياره",
+                  "value": "لم يطلب زياره"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "طرق التواصل",
+              "displayName": "طرق التواصل",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "واتس",
+                  "value": "واتس"
+                },
+                {
+                  "name": "انستا",
+                  "value": "انستا"
+                },
+                {
+                  "name": "تليجرام",
+                  "value": "تليجرام"
+                },
+                {
+                  "name": "ماسنجر",
+                  "value": "ماسنجر"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الفتره",
+              "displayName": "الفتره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "الصباح",
+                  "value": "الصباح"
+                },
+                {
+                  "name": "المساء",
+                  "value": "المساء"
+                },
+                {
+                  "name": "الليل",
+                  "value": "الليل"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "تاريخ التواصل الاخير",
+              "displayName": "تاريخ التواصل الاخير",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        3440,
+        1792
+      ],
+      "id": "4f186316-3527-4a0f-bf09-b3c73ab0b155",
+      "name": "Update (تاريخ التواصل الاخير/سبب الطلب)",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 14,18,22 * * 0-4,6"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -736,
+        2704
+      ],
+      "id": "d12e6fd6-bb1b-40e6-9a00-17d1ccef7180",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74ce5a54-3a9c-41f1-b742-329a0b8c1bc7",
+              "name": "Time",
+              "value": "22",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -496,
+        2704
+      ],
+      "id": "fe7949d2-52b3-4272-8325-34988abd4ca8",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ \n  $json.Time >= 14 && $json.Time < 16 ? 0 :\n  $json.Time >= 18 && $json.Time < 20 ? 1 :\n  $json.Time >= 22 && $json.Time < 24 ? 2 :\n  3\n}}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        2672
+      ],
+      "id": "607d4998-78c6-47c3-b08a-7908bfd6eceb",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc8a0e97-58da-4d06-ad73-0925f2a47be1",
+              "name": "period",
+              "value": "الليل",
+              "type": "string"
+            },
+            {
+              "id": "d61f6d86-ecd9-4795-8257-6d1a1c02d876",
+              "name": "الموظف",
+              "value": "اسماعيل ابو زيد",
+              "type": "string"
+            },
+            {
+              "id": "6c97498b-3f7a-470b-b956-cfda2b7bcd55",
+              "name": "instagram",
+              "value": "={{ $json.instagram }}",
+              "type": "number"
+            },
+            {
+              "id": "3f18e715-92a3-42f2-9efd-7e44b83baded",
+              "name": "facebook",
+              "value": "={{ $json.facebook }}",
+              "type": "number"
+            },
+            {
+              "id": "c02434b4-7a5f-4158-beba-3e5df78c0cef",
+              "name": "tiktok",
+              "value": "={{ $json.tiktok }}",
+              "type": "number"
+            },
+            {
+              "id": "75ef12f3-7b42-4a8b-81d2-0c7c5dd5e860",
+              "name": "whatsapp",
+              "value": "={{ $json.whatsapp }}",
+              "type": "number"
+            },
+            {
+              "id": "3a371362-6021-428b-8f62-a2da00ced5ea",
+              "name": "sales",
+              "value": "={{ $json.sales }}",
+              "type": "number"
+            },
+            {
+              "id": "50562744-dd22-44dd-ae4d-e6b5a7eda7eb",
+              "name": "total",
+              "value": "={{ $json.total }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1456,
+        2576
+      ],
+      "id": "02d013c7-c879-4ce0-8e94-b423868a0af1",
+      "name": "الليل1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "filterByFormula": "=AND(\n    ({تاريخ التواصل الاخير} / 3600) >= 8,\n    ({تاريخ التواصل الاخير} / 3600) < 14\n)",
+        "options": {},
+        "sort": {
+          "property": []
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        2256
+      ],
+      "id": "63cf9c8f-6c13-4227-81fe-afddadf90dd7",
+      "name": "Search الصباح1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "filterByFormula": "=AND(\n    ({تاريخ التواصل الاخير} / 3600) >= 14,\n    ({تاريخ التواصل الاخير} / 3600) < 18\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        2688
+      ],
+      "id": "baa7d734-4653-4a97-b217-fc33fc2b4cfd",
+      "name": "Search المساء1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "محتملين صور",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_1>"
+        },
+        "filterByFormula": "=AND(\n    ({تاريخ التواصل الاخير} / 3600) >= 18,\n    ({تاريخ التواصل الاخير} / 3600) < 22\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        3136
+      ],
+      "id": "4b7f3af6-77fb-4c0b-b4c8-8b6ac1bd1cfe",
+      "name": "Search الليل1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const records = $input.all();\n\nlet sales = 0;\n\nfor (const item of records) {\n const data = item.json.fields;  // ✅ الوصول الصحيح للحقول\n \n  const status = data['الحالة'];\n\n \n  // المبيعات\n  if (status === 'طلب شراء') {\n    sales++;\n  }\n}\n\nreturn [\n  {\n    json: {\n      sales\n     \n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        3152
+      ],
+      "id": "270449e3-7f24-484b-b1a7-da7ddb159c1e",
+      "name": "propability2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c3ab3803-c376-4015-b457-c4ea6997e397",
+              "leftValue": "={{ $json.fields[\"الفتره\"] }}",
+              "rightValue": "الصباح",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        2256
+      ],
+      "id": "dff1b990-834f-4cb3-911a-d7334d1e3ce2",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c3ab3803-c376-4015-b457-c4ea6997e397",
+              "leftValue": "={{ $json.fields[\"الفتره\"] }}",
+              "rightValue": "الليل",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        3136
+      ],
+      "id": "936d7bac-1735-4abc-a296-1a6b98c765cb",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c3ab3803-c376-4015-b457-c4ea6997e397",
+              "leftValue": "={{ $json.fields[\"الفتره\"] }}",
+              "rightValue": "المساء",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        2688
+      ],
+      "id": "cf2b04c5-6639-42a6-bd12-da940ded00e5",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "jsCode": "console.log('عدد العناصر:', $input.all().length);\nconsole.log(JSON.stringify($input.all(), null, 2));\n\nconst records = $input.all();\nlet instagram = 0;\nlet facebook = 0;\nlet tiktok = 0;\nlet whatsapp = 0;\nlet sales = 0;\nlet validCount = 0;\n\nfor (const item of records) {\n  const data = item.json.fields;\n  if (!data) {\n    console.log('عنصر ناقصه fields:', JSON.stringify(item.json));\n    continue;\n  }\n  validCount++;\n  const source = data['مصدر العميل'];\n  const status = data['الحالة'];\n  if (source === 'انستا') instagram++;\n  if (source === 'فيس بوك') facebook++;\n  if (source === 'تيك توك') tiktok++;\n  if (source === 'whatsapp') whatsapp++;\n  if (status === 'طلب شراء') sales++;\n}\n\nreturn [{\n  json: { instagram, facebook, tiktok, whatsapp, sales, total: validCount }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        2576
+      ],
+      "id": "a516e1a5-899b-4b4c-a44a-098c066f067d",
+      "name": "propability3"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_4>",
+          "mode": "list",
+          "cachedResultName": "احصاْئيات العملاء المحتمالين",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_4>"
+        },
+        "filterByFormula": "=AND(     IS_SAME({تاريخ}, TODAY(), 'day'),     {الفتره} = \"الليل\" )",
+        "returnAll": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        3152
+      ],
+      "id": "4936e4dc-6fef-4bf2-af0f-40f8b154415a",
+      "name": "Search المبيعات",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const records = $input.all();\n\nlet sales = 0;\n\nfor (const item of records) {\n const data = item.json.fields;  // ✅ الوصول الصحيح للحقول\n \n  const status = data['الحالة'];\n\n \n  // المبيعات\n  if (status === 'طلب شراء') {\n    sales++;\n  }\n}\n\nreturn [\n  {\n    json: {\n      sales\n     \n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        2992
+      ],
+      "id": "b8a2e5b9-196b-4ee2-92ba-94942fc1cc9f",
+      "name": "propability4"
+    },
+    {
+      "parameters": {
+        "jsCode": "console.log('عدد العناصر:', $input.all().length);\nconsole.log(JSON.stringify($input.all(), null, 2));\n\nconst records = $input.all();\nlet instagram = 0;\nlet facebook = 0;\nlet tiktok = 0;\nlet whatsapp = 0;\nlet sales = 0;\nlet validCount = 0;\n\nfor (const item of records) {\n  const data = item.json.fields;\n  if (!data) {\n    console.log('عنصر ناقصه fields:', JSON.stringify(item.json));\n    continue;\n  }\n  validCount++;\n  const source = data['مصدر العميل'];\n  const status = data['الحالة'];\n  if (source === 'انستا') instagram++;\n  if (source === 'فيس بوك') facebook++;\n  if (source === 'تيك توك') tiktok++;\n  if (source === 'whatsapp') whatsapp++;\n  if (status === 'طلب شراء') sales++;\n}\n\nreturn [{\n  json: { instagram, facebook, tiktok, whatsapp, sales, total: validCount }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        2400
+      ],
+      "id": "65432b21-a7a2-4901-9ff2-31fcbe479b12",
+      "name": "propability5"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_4>",
+          "mode": "list",
+          "cachedResultName": "احصاْئيات العملاء المحتمالين",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_4>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "محتملين انستا": "={{ $json.instagram }}",
+            "محتملين واتساب": "={{ $json.whatsapp }}",
+            "محتملين فيسبوك": "={{ $json.facebook }}",
+            "محتملين سناب": "={{ $json.tiktok }}",
+            "مجموع ما تم تسجيله": "={{ $json.total }}",
+            "محتملين Tiktok": "={{ $json.tiktok }}",
+            "تاريخ": "={{ $now.toISO() }}",
+            "الفتره": "={{ $json.period }}",
+            "الموظف": "={{ $json[\"الموظف\"] }}",
+            "المبيعات": "={{ $json.sales }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "تاريخ",
+              "displayName": "تاريخ",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الفتره",
+              "displayName": "الفتره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "الليل",
+                  "value": "الليل"
+                },
+                {
+                  "name": "الصباح",
+                  "value": "الصباح"
+                },
+                {
+                  "name": "المساء",
+                  "value": "المساء"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الموظف",
+              "displayName": "الموظف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "محمد يوسف حمدي",
+                  "value": "محمد يوسف حمدي"
+                },
+                {
+                  "name": "اسماعيل ابو زيد",
+                  "value": "اسماعيل ابو زيد"
+                },
+                {
+                  "name": "خالد الصياد",
+                  "value": "خالد الصياد"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "محتملين انستا",
+              "displayName": "محتملين انستا",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "محتملين واتساب",
+              "displayName": "محتملين واتساب",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "محتملين فيسبوك",
+              "displayName": "محتملين فيسبوك",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "محتملين سناب",
+              "displayName": "محتملين سناب",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "مجموع ما تم تسجيله",
+              "displayName": "مجموع ما تم تسجيله",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "المبيعات",
+              "displayName": "المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "محتملين Tiktok",
+              "displayName": "محتملين Tiktok",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        2400
+      ],
+      "id": "44ed69c6-93cb-4663-9931-1dcbb5c6cabc",
+      "name": "Create a record4",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_4>",
+          "mode": "list",
+          "cachedResultName": "احصاْئيات العملاء المحتمالين",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_4>"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "المبيعات": "={{ $json[\"اجمالي المبيعات\"] }}",
+            "الفتره": "={{ $json[\"الفتره \"] }}"
+          },
+          "matchingColumns": [
+            "الفتره"
+          ],
+          "schema": [
+            {
+              "id": "تاريخ",
+              "displayName": "تاريخ",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "الفتره",
+              "displayName": "الفتره",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "الليل",
+                  "value": "الليل"
+                },
+                {
+                  "name": "الصباح",
+                  "value": "الصباح"
+                },
+                {
+                  "name": "المساء",
+                  "value": "المساء"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "الموظف",
+              "displayName": "الموظف",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "محمد يوسف حمدي",
+                  "value": "محمد يوسف حمدي"
+                },
+                {
+                  "name": "اسماعيل ابو زيد",
+                  "value": "اسماعيل ابو زيد"
+                },
+                {
+                  "name": "خالد الصياد",
+                  "value": "خالد الصياد"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "محتملين انستا",
+              "displayName": "محتملين انستا",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "محتملين واتساب",
+              "displayName": "محتملين واتساب",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "محتملين فيسبوك",
+              "displayName": "محتملين فيسبوك",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "محتملين سناب",
+              "displayName": "محتملين سناب",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "مجموع ما تم تسجيله",
+              "displayName": "مجموع ما تم تسجيله",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "المبيعات",
+              "displayName": "المبيعات",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "محتملين Tiktok",
+              "displayName": "محتملين Tiktok",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        2992
+      ],
+      "id": "9dbd7c0f-8b6f-4eb1-94de-03df28a4ccef",
+      "name": "Update sale1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_4>",
+          "mode": "list",
+          "cachedResultName": "احصاْئيات العملاء المحتمالين",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_4>"
+        },
+        "filterByFormula": "=AND(     IS_SAME({تاريخ}, TODAY(), 'day'),     {الفتره} = \"المساء\" )",
+        "returnAll": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        2992
+      ],
+      "id": "15b76812-9b46-460c-8425-f24ede3ff890",
+      "name": "Search المبيعات1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc8a0e97-58da-4d06-ad73-0925f2a47be1",
+              "name": "period",
+              "value": "المساء",
+              "type": "string"
+            },
+            {
+              "id": "d61f6d86-ecd9-4795-8257-6d1a1c02d876",
+              "name": "الموظف",
+              "value": "محمد يوسف",
+              "type": "string"
+            },
+            {
+              "id": "34e9ada0-fff1-4ef5-b6a4-7eb62dedcbd1",
+              "name": "instagram",
+              "value": "={{ $json.instagram }}",
+              "type": "number"
+            },
+            {
+              "id": "6ec28843-55eb-45e6-aa69-b294548e86f1",
+              "name": "facebook",
+              "value": "={{ $json.facebook }}",
+              "type": "number"
+            },
+            {
+              "id": "c69d4212-d4d2-41d2-96b6-29620aa492fc",
+              "name": "tiktok",
+              "value": "={{ $json.tiktok }}",
+              "type": "number"
+            },
+            {
+              "id": "e8aa9ff1-8a9f-47b2-bc6d-7b1caacbbe6f",
+              "name": "whatsapp",
+              "value": "={{ $json.whatsapp }}",
+              "type": "number"
+            },
+            {
+              "id": "03eef6bf-27cc-4139-b0b2-f40c58cb2d72",
+              "name": "sales",
+              "value": "={{ $json.sales }}",
+              "type": "number"
+            },
+            {
+              "id": "a0b5d5f8-b6bd-4937-aa83-ba8733b766ce",
+              "name": "total",
+              "value": "={{ $json.total }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1456,
+        2400
+      ],
+      "id": "e119ba4c-151c-4ed0-9842-4d8ace4995f1",
+      "name": "المساء2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const records = $input.all();\n\nlet sales = 0;\n\nfor (const item of records) {\n const data = item.json.fields;  // ✅ الوصول الصحيح للحقول\n \n  const status = data['الحالة'];\n\n \n  // المبيعات\n  if (status === 'طلب شراء') {\n    sales++;\n  }\n}\n\nreturn [\n  {\n    json: {\n      sales\n     \n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        2832
+      ],
+      "id": "2e4615c3-6013-4a26-93b7-2506875d71cf",
+      "name": "propability6"
+    },
+    {
+      "parameters": {
+        "jsCode": "console.log('عدد العناصر:', $input.all().length);\nconsole.log(JSON.stringify($input.all(), null, 2));\n\nconst records = $input.all();\nlet instagram = 0;\nlet facebook = 0;\nlet tiktok = 0;\nlet whatsapp = 0;\nlet sales = 0;\nlet validCount = 0;\n\nfor (const item of records) {\n  const data = item.json.fields;\n  if (!data) {\n    console.log('عنصر ناقصه fields:', JSON.stringify(item.json));\n    continue;\n  }\n  validCount++;\n  const source = data['مصدر العميل'];\n  const status = data['الحالة'];\n  if (source === 'انستا') instagram++;\n  if (source === 'فيس بوك') facebook++;\n  if (source === 'تيك توك') tiktok++;\n  if (source === 'whatsapp') whatsapp++;\n  if (status === 'طلب شراء') sales++;\n}\n\nreturn [{\n  json: { instagram, facebook, tiktok, whatsapp, sales, total: validCount }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        2240
+      ],
+      "id": "1b96e97e-211b-4d0a-ba55-5948df50ecf7",
+      "name": "propability7"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "<AIRTABLE_BASE_ID_1>",
+          "mode": "list",
+          "cachedResultName": "رخاء عمان",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>"
+        },
+        "table": {
+          "__rl": true,
+          "value": "<AIRTABLE_TABLE_ID_4>",
+          "mode": "list",
+          "cachedResultName": "احصاْئيات العملاء المحتمالين",
+          "cachedResultUrl": "https://airtable.com/<AIRTABLE_BASE_ID_1>/<AIRTABLE_TABLE_ID_4>"
+        },
+        "filterByFormula": "=AND(     IS_SAME({تاريخ}, TODAY(), 'day'),     {الفتره} = \"الصباح\" )",
+        "returnAll": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        2832
+      ],
+      "id": "32cf040b-cb72-4d30-9b50-0131fedc2185",
+      "name": "Search المبيعات2",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "m1z4j5CLgfn728sv",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc8a0e97-58da-4d06-ad73-0925f2a47be1",
+              "name": "period",
+              "value": "الصباح",
+              "type": "string"
+            },
+            {
+              "id": "d61f6d86-ecd9-4795-8257-6d1a1c02d876",
+              "name": "الموظف",
+              "value": "خالد الصياد",
+              "type": "string"
+            },
+            {
+              "id": "e7fb352f-93cf-489a-8ee8-8d4744568537",
+              "name": "instagram",
+              "value": "={{ $json.instagram }}",
+              "type": "number"
+            },
+            {
+              "id": "40908d4f-2c04-42d9-8d81-c5f48e57dc3c",
+              "name": "facebook",
+              "value": "={{ $json.facebook }}",
+              "type": "number"
+            },
+            {
+              "id": "af9d93bc-b3a1-412e-8e5a-4a6e05f2c5c0",
+              "name": "tiktok",
+              "value": "={{ $json.tiktok }}",
+              "type": "number"
+            },
+            {
+              "id": "4f711584-ba2a-4404-a110-5ab7f00033b5",
+              "name": "whatsapp",
+              "value": "={{ $json.whatsapp }}",
+              "type": "number"
+            },
+            {
+              "id": "a3ebb0be-c66f-47d9-801b-23ef3f85a5e4",
+              "name": "sales",
+              "value": "={{ $json.sales }}",
+              "type": "number"
+            },
+            {
+              "id": "ad6bae4d-394a-40f2-9d51-82720908ef16",
+              "name": "total",
+              "value": "={{ $json.total }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1456,
+        2240
+      ],
+      "id": "57c17e09-726e-4d3e-b615-f85680a6e921",
+      "name": "الصباح2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39e87041-08d1-40eb-81d6-2a33c744aa13",
+              "name": "اجمالي المبيعات",
+              "value": "={{$('propability4').item.json.sales+ $json.fields[\"المبيعات\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "e49cf8df-e5f8-405f-883e-cba73e21d195",
+              "name": "الفتره ",
+              "value": "={{ $json.fields[\"الفتره\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1456,
+        2992
+      ],
+      "id": "4b86f37c-394b-4473-aad1-5f19c8cf0d6d",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39e87041-08d1-40eb-81d6-2a33c744aa13",
+              "name": "اجمالي المبيعات",
+              "value": "={{$('propability6').item.json.sales+ $json.fields[\"المبيعات\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "e49cf8df-e5f8-405f-883e-cba73e21d195",
+              "name": "الفتره ",
+              "value": "={{ $json.fields[\"الفتره\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1456,
+        2832
+      ],
+      "id": "ac4b8bd8-1da7-44b8-867c-734131ae82a1",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39e87041-08d1-40eb-81d6-2a33c744aa13",
+              "name": "اجمالي المبيعات",
+              "value": "={{$('propability2').item.json.sales+ $json.fields[\"المبيعات\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "e49cf8df-e5f8-405f-883e-cba73e21d195",
+              "name": "الفتره ",
+              "value": "={{ $json.fields[\"الفتره\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1456,
+        3152
+      ],
+      "id": "44158125-5d95-44fd-9a83-67f04fad18a8",
+      "name": "Edit Fields6"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        2832
+      ],
+      "id": "83b12dd5-3340-44d5-8641-61caa5b6bab8",
+      "name": "Wait",
+      "webhookId": "9aee5cad-e389-4aef-9d1d-4ab80f9eb06c"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        2992
+      ],
+      "id": "64c94b92-90dc-4c0f-9595-feb4125b41b9",
+      "name": "Wait2",
+      "webhookId": "942f2cd4-af29-48c8-aab8-4e48ee13771b"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        3152
+      ],
+      "id": "5dbc92d6-db24-47a8-84ef-9bd8d2d40d1b",
+      "name": "Wait3",
+      "webhookId": "612751f8-c239-4fcb-bf5f-fb46bf229e83"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 128,
+        "width": 592,
+        "color": "#ECE76A"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        2688
+      ],
+      "id": "e48f45c6-5620-4854-9007-8a2b3dfb512f",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 432,
+        "width": 800,
+        "color": "#B672BB"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        752,
+        2240
+      ],
+      "id": "d68ca195-ddc5-4ee3-8f0a-4c4e7b5fc274",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 976,
+        "width": 320,
+        "color": "#B54040"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        96,
+        2256
+      ],
+      "id": "347723b7-2fa7-4297-8e67-fe5536bf3a3b",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3728,
+        2976
+      ],
+      "id": "871c053c-40fa-4dca-b15c-e36246611ac5",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KORWtLcQnAO4aP2H",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5168,
+        1776
+      ],
+      "id": "fbed8963-d900-4151-8035-3b3ff7d15606",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = $now\n  .setZone('Africa/Cairo')\n  .toFormat('yyyy-MM-dd');\n\nreturn $input.all().filter(item => {\n  const fields = item.json.fields;\n  if (!fields) return false;\n  return fields[\"تاريخ التواصل الأول\"] === today;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3296,
+        2496
+      ],
+      "id": "0543b297-4394-48e0-aa66-9a714315c3f1",
+      "name": "Code in JavaScript1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = $now\n  .setZone('Africa/Cairo')\n  .toFormat('yyyy-MM-dd');\n\nreturn $input.all().filter(item => {\n  const date = item.json?.fields?.[\"تاريخ التواصل الأول\"];\n\n  if (!date) return false;\n\n  return date.toString().substring(0, 10) === today;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        1760
+      ],
+      "id": "a2f99e26-2553-4a48-9d9d-be6d4fdcb585",
+      "name": "Code in JavaScript2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const countryCodes = [\n  '971','966','973','974','965','968','962','963','964','967','970','961',\n  '249','218','216','213','212','222','223','224','225','226','227','228',\n  '20','30','31','32','33','34','36','39','40','41','43','44','45','46',\n  '47','48','49','51','52','53','54','55','56','57','58','60','61','62',\n  '63','64','65','66','81','82','84','86','90','91','92','93','94','95',\n  '98','1','7'\n];\n\n// أطول Country Code الأول\nconst sortedCodes = [...countryCodes].sort((a, b) => b.length - a.length);\n\n\nfunction getShift() {\n  const cairoTime = new Date().toLocaleString('en-US', {\n    timeZone: 'Africa/Cairo'\n  });\n\n  const hour = new Date(cairoTime).getHours();\n\n  if (hour >= 8 && hour < 14) {\n    return 'الصباح';\n  }\n\n  if (hour >= 14 && hour < 18) {\n    return 'المساء';\n  }\n\n  if (hour >= 18 && hour < 22) {\n    return 'الليل';\n  }\n\n  return 'الليل';\n}\n\n\nconst items = $input.all();\nconst results = [];\n\n\nfor (const item of items) {\n\n  const body = item.json?.body || {};\n\n  // =========================\n  // Sender Data\n  // =========================\n\n  const senderData = body.senderData || {};\n\n  const chatId = senderData.chatId || '';\n  const sender = senderData.sender || '';\n\n  // هل الرسالة من Group؟\n  const isGroup = chatId.endsWith('@g.us');\n\n  item.json.isGroup = isGroup;\n\n\n  // =========================\n  // Get Customer Number\n  // =========================\n\n  /*\n    Normal WhatsApp:\n    chatId = <YOUR_WHATSAPP_ID>@c.us\n\n    Group WhatsApp:\n    chatId = GROUP_ID@g.us\n    sender = <YOUR_WHATSAPP_ID>@c.us\n\n    لذلك:\n    Group -> sender\n    Normal -> chatId\n  */\n\n  const phoneId = isGroup ? sender : chatId;\n\n\n  if (!phoneId) {\n\n    item.json.countryCode = '';\n    item.json.phoneNumber = '';\n\n  } else {\n\n    // إزالة @c.us أو @g.us\n    const raw = phoneId\n      .replace('@c.us', '')\n      .replace('@g.us', '');\n\n    // استخراج Country Code\n    const matched = sortedCodes.find(code =>\n      raw.startsWith(code)\n    );\n\n    if (matched) {\n\n      item.json.countryCode = matched;\n\n      item.json.phoneNumber =\n        raw.substring(matched.length);\n\n    } else {\n\n      item.json.countryCode = '';\n\n      item.json.phoneNumber = raw;\n    }\n  }\n\n\n  // =========================\n  // Message Data\n  // =========================\n\n  const messageData = body.messageData || {};\n\n  const extData =\n    messageData.extendedTextMessageData || {};\n\n\n  // =========================\n  // Source\n  // =========================\n\n  // هذا الـWorkflow خاص بالـWhatsApp\n  item.json.source = 'واتس';\n\n\n  // =========================\n  // Ad Title\n  // =========================\n\n  item.json.adTitle =\n    extData.title || '';\n\n\n  // =========================\n  // Shift\n  // =========================\n\n  item.json.shift = getShift();\n\n\n  // =========================\n  // Return\n  // =========================\n\n  results.push(item);\n}\n\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        1888
+      ],
+      "id": "d641205d-a543-462c-b0ba-18d2e02b1ee3",
+      "name": "get (مصدر العميل +shift+ سبب التواصل)"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        2976
+      ],
+      "id": "e0cd5d5a-38a5-409b-b9a7-0515a50ac665",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "62b050a0-6f0c-436b-be66-d73caf07fa77",
+              "leftValue": "={{ $json.fields[\"الحالة\"] }}",
+              "rightValue": "طلب شراء",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1056,
+        1600
+      ],
+      "id": "2a2971fa-cb25-4a28-8b69-3ecdc70cd207",
+      "name": "IF client buy"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        1440
+      ],
+      "id": "7e53b9b4-fcfa-4caf-9993-fe5f474b294b",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.green-api.com/waInstance<GREEN_API_INSTANCE>/sendMessage/<GREEN_API_TOKEN>",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chatId\": \"<YOUR_WHATSAPP_ID>@c.us\",\n  \"message\": {{ JSON.stringify($json.message) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1584,
+        1440
+      ],
+      "id": "bd489883-9755-4cb2-a3b1-4ceb64da5526",
+      "name": "Chat with lead1",
+      "retryOnFail": false,
+      "executeOnce": false,
+      "maxTries": 2,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5dfaa236-6d83-477a-a56e-584bf27450f9",
+              "name": "message",
+              "value": "if you need to edit the order (item or address ) or complain or follow the order\n\ncontact with this number 01128819096\n\nthank you",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1312,
+        1440
+      ],
+      "id": "feb86653-3bf5-4060-bc91-1cafe7855f37",
+      "name": "Message form"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "get (مصدر العميل +shift+ سبب التواصل)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "RateLimiter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "normal message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "get(phone and code and message)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add Failed Messages1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat with lead": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add Failed Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Full details?": {
+      "main": [
+        [
+          {
+            "node": "want to order?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "want to order?": {
+      "main": [
+        [
+          {
+            "node": "Update (حاله الطلب)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Customer": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Update (حاله الطلب)": {
+      "main": [
+        [
+          {
+            "node": "buy message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Failed Messages": {
+      "main": [
+        [
+          {
+            "node": "sent failed message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buy message": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "normal message": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Chat with lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Failed Messages1": {
+      "main": [
+        [
+          {
+            "node": "sent failed message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sent failed message1": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Update (تاريخ التواصل الاخير/سبب الطلب)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Customer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Customer1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get Customer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get(phone and code and message)": {
+      "main": [
+        [
+          {
+            "node": "ProcessedMessages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Calculate Time to wait": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Update reservedTime",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RateLimiter": {
+      "main": [
+        [
+          {
+            "node": "Calculate Time to wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ProcessedMessages": {
+      "main": [
+        [
+          {
+            "node": "IF not Duplecated?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record1": {
+      "main": [
+        [
+          {
+            "node": "Get Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF not Duplecated?": {
+      "main": [
+        [
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update reservedTime": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update (تاريخ التواصل الاخير/سبب الطلب)": {
+      "main": [
+        [
+          {
+            "node": "Full details?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Search الصباح1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search المساء1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search الليل1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "الليل1": {
+      "main": [
+        [
+          {
+            "node": "Create a record4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "propability2": {
+      "main": [
+        [
+          {
+            "node": "Search المبيعات",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search الصباح1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search الليل1": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search المساء1": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "propability3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "propability3": {
+      "main": [
+        [
+          {
+            "node": "الليل1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search المبيعات": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "propability4": {
+      "main": [
+        [
+          {
+            "node": "Search المبيعات1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "propability5": {
+      "main": [
+        [
+          {
+            "node": "المساء2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search المبيعات1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "propability5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "المساء2": {
+      "main": [
+        [
+          {
+            "node": "Create a record4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "propability6": {
+      "main": [
+        [
+          {
+            "node": "Search المبيعات2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "propability7": {
+      "main": [
+        [
+          {
+            "node": "الصباح2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search المبيعات2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "propability7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "الصباح2": {
+      "main": [
+        [
+          {
+            "node": "Create a record4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Update sale1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Update sale1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields6": {
+      "main": [
+        [
+          {
+            "node": "Update sale1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "propability6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "propability4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "propability2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "IF client buy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get (مصدر العميل +shift+ سبب التواصل)": {
+      "main": [
+        [
+          {
+            "node": "Create Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF client buy": {
+      "main": [
+        [
+          {
+            "node": "Message form",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat with lead1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message form": {
+      "main": [
+        [
+          {
+            "node": "Chat with lead1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "63943157-225c-40a4-b06b-e270f96255e6",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "sAQL2RLe1BCRiQwe",
+  "tags": []
+}

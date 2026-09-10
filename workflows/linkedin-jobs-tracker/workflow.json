@@ -1,0 +1,925 @@
+{
+  "name": "New Version_Eng.omar",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "64ab5ea8-240b-4065-be7b-bbf405071f70",
+      "name": "Manual / Schedule Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -4192,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_7>",
+          "mode": "list",
+          "cachedResultName": "TEST_company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_7>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "compa",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_7>/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "aec0be7e-5c7c-4d09-8f71-f18d5935c573",
+      "name": "Google Sheets - Read Companies",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        -3984,
+        624
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zMG9mUTv1sPcsltq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "8fb27932-582b-485a-ab7d-7291346ea624",
+      "name": "Loop Over Companies (1 at a time)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -3792,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// === STEP 1: Resolve LinkedIn Company ID via the public guest typeahead endpoint ===\n// Endpoint (undocumented but widely used, no login required):\n// https://www.linkedin.com/jobs-guest/api/typeaheadHits?typeaheadType=COMPANY&query=<name>\n\nconst company = ($json['Company Name'] || $json['Company'] || $json.company || '').toString().trim();\nconst location = ($json['Location'] || $json['Country'] || '').toString().trim();\n\nif (!company) {\n  return [{ json: { ...$json, status: 'FAILED', error_message: 'Missing Company in row' } }];\n}\n\nconst url = `https://www.linkedin.com/jobs-guest/api/typeaheadHits?typeaheadType=COMPANY&query=${encodeURIComponent(company)}`;\n\nlet companyId = null;\nlet matchedName = null;\nlet candidates = [];\n\nconst norm = (s) => (s || '').toString().trim().toLowerCase();\n\ntry {\n  const res = await this.helpers.httpRequest({\n    method: 'GET',\n    url,\n    headers: {\n      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36',\n      'Accept': 'application/json'\n    },\n    json: true,\n    timeout: 15000\n  });\n\n  candidates = Array.isArray(res) ? res : (res.items || res.hits || res || []);\n\n  const exact = candidates.find(c => norm(c.displayName || c.text) === norm(company));\n  const chosen = exact || candidates[0];\n\n  if (chosen) {\n    const urn = chosen.trackingUrn || chosen.targetUrn || chosen.urn || chosen.id || '';\n    const match = String(urn).match(/(\\d+)\\s*$/);\n    companyId = match ? match[1] : null;\n    matchedName = chosen.displayName || chosen.text || null;\n  }\n} catch (err) {\n  return [{ json: { ...$json, linkedin_company_id: null, status: 'FAILED', error_message: `Company resolution request failed: ${err.message}` } }];\n}\n\nif (!companyId) {\n  return [{ json: { ...$json, linkedin_company_id: null, status: 'FAILED', error_message: `Company not found on LinkedIn typeahead (0 matches for \"${company}\")` } }];\n}\n\nreturn [{\n  json: {\n    ...$json,\n    location,\n    linkedin_company_id: companyId,\n    matched_company_name: matchedName,\n    company_candidate_count: candidates.length,\n    status: 'RESOLVED'\n  }\n}];"
+      },
+      "id": "7fe4a48f-4ab0-468b-a13f-7cb119920b29",
+      "name": "Code - Resolve Company ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3584,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==========================================\n// LINKEDIN JOB COUNT\n// Company + Location + Past 24 Hours\n// ==========================================\n\nif ($json.status === 'FAILED') {\n  return [{ json: $json }];\n}\n\nconst companyId = String(\n  $json.linkedin_company_id || ''\n).trim();\n\nconst location = String(\n  $json.posted_location ||\n  $json.Location ||\n  $json.location ||\n  ''\n).trim();\n\nconst postedWithin =\n  $json.posted_within || 'Past 24 hours';\n\nif (!companyId) {\n  return [{\n    json: {\n      ...$json,\n      status: 'FAILED',\n      error_message: 'Missing linkedin_company_id'\n    }\n  }];\n}\n\nif (!location) {\n  return [{\n    json: {\n      ...$json,\n      status: 'FAILED',\n      error_message: 'Missing location'\n    }\n  }];\n}\n\n\n// ==========================================\n// LinkedIn time filter\n// Past 24 hours = r86400\n// ==========================================\n\nlet timeFilter = '';\n\nif (postedWithin === 'Past 24 hours') {\n  timeFilter = '&f_TPR=r86400';\n}\n\nelse if (postedWithin === 'Past week') {\n  timeFilter = '&f_TPR=r604800';\n}\n\nelse if (postedWithin === 'Past month') {\n  timeFilter = '&f_TPR=r2592000';\n}\n\n\n// ==========================================\n// SETTINGS\n// ==========================================\n\nconst PAGE_SIZE = 10;\nconst MAX_PAGES = 50;\n\nlet start = 0;\n\nconst allJobIds = new Set();\n\nlet pagesChecked = 0;\nlet lastStatus = null;\n\n\n// ==========================================\n// REQUEST\n// ==========================================\n\nasync function fetchPage(url) {\n\n  return await this.helpers.httpRequest({\n\n    method: 'GET',\n\n    url,\n\n    headers: {\n\n      'User-Agent':\n        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0 Safari/537.36',\n\n      'Accept':\n        'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',\n\n      'Accept-Language':\n        'en-US,en;q=0.9'\n    },\n\n    returnFullResponse: true,\n\n    timeout: 15000\n  });\n}\n\n\n// ==========================================\n// EXTRACT JOB IDS\n// ==========================================\n\nfunction extractJobIds(html) {\n\n  const ids = new Set();\n\n  // urn:li:jobPosting\n  for (\n    const match of html.matchAll(\n      /urn:li:jobPosting:(\\d+)/g\n    )\n  ) {\n    ids.add(match[1]);\n  }\n\n  // data-job-id\n  for (\n    const match of html.matchAll(\n      /data-job-id=[\"'](\\d+)[\"']/g\n    )\n  ) {\n    ids.add(match[1]);\n  }\n\n  // /jobs/view/123456\n  for (\n    const match of html.matchAll(\n      /\\/jobs\\/view\\/(\\d+)/g\n    )\n  ) {\n    ids.add(match[1]);\n  }\n\n  return [...ids];\n}\n\n\n// ==========================================\n// PAGINATION\n// ==========================================\n\nfor (\n  let page = 0;\n  page < MAX_PAGES;\n  page++\n) {\n\n  pagesChecked++;\n\n  const url =\n    'https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search' +\n\n    `?f_C=${encodeURIComponent(companyId)}` +\n\n    `&location=${encodeURIComponent(location)}` +\n\n    timeFilter +\n\n    `&start=${start}`;\n\n\n  try {\n\n    const response =\n      await fetchPage(url);\n\n    lastStatus =\n      response.statusCode ??\n      response.status ??\n      null;\n\n\n    // ======================================\n    // RATE LIMIT / BLOCK\n    // ======================================\n\n    if (\n      lastStatus === 429 ||\n      lastStatus === 403 ||\n      lastStatus === 999\n    ) {\n\n      return [{\n        json: {\n\n          ...$json,\n\n          linkedin_reported_job_count:\n            null,\n\n          linkedin_unique_jobs_found:\n            allJobIds.size,\n\n          status: 'BLOCKED',\n\n          error_message:\n            `LinkedIn returned HTTP ${lastStatus}`,\n\n          pages_checked:\n            pagesChecked\n        }\n      }];\n    }\n\n\n    const html =\n      String(response.body || '');\n\n\n    // ======================================\n    // EXTRACT\n    // ======================================\n\n    const pageJobIds =\n      extractJobIds(html);\n\n\n    console.log(\n      `Page ${page + 1} | ` +\n      `start=${start} | ` +\n      `jobs=${pageJobIds.length}`\n    );\n\n\n    // ======================================\n    // NO JOBS\n    // ======================================\n\n    if (\n      pageJobIds.length === 0\n    ) {\n      break;\n    }\n\n\n    // ======================================\n    // UNIQUE\n    // ======================================\n\n    for (\n      const jobId of pageJobIds\n    ) {\n\n      allJobIds.add(jobId);\n\n    }\n\n\n    // ======================================\n    // END\n    // ======================================\n\n    if (\n      pageJobIds.length < PAGE_SIZE\n    ) {\n      break;\n    }\n\n\n    // ======================================\n    // NEXT PAGE\n    // ======================================\n\n    start += PAGE_SIZE;\n\n\n    // ======================================\n    // DELAY\n    // ======================================\n\n    await new Promise(resolve =>\n      setTimeout(\n        resolve,\n        800 + Math.random() * 700\n      )\n    );\n\n  }\n\n  catch (error) {\n\n    return [{\n      json: {\n\n        ...$json,\n\n        linkedin_reported_job_count:\n          null,\n\n        linkedin_unique_jobs_found:\n          allJobIds.size,\n\n        status: 'FAILED',\n\n        error_message:\n          error.message,\n\n        pages_checked:\n          pagesChecked\n      }\n    }];\n  }\n}\n\n\n// ==========================================\n// FINAL RESULT\n// ==========================================\n\nconst total =\n  allJobIds.size;\n\n\nreturn [{\n  json: {\n\n    ...$json,\n\n    posted_within:\n      'Past 24 hours',\n\n    linkedin_reported_job_count:\n      total,\n\n    linkedin_unique_jobs_found:\n      total,\n\n    pages_checked:\n      pagesChecked,\n\n    status:\n      total > 0\n        ? 'COUNTED'\n        : 'ZERO_JOBS'\n  }\n}];"
+      },
+      "id": "f8af6079-3330-4ed9-99d8-4fe278392c9b",
+      "name": "Code - Count Actual LinkedIn Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3392,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.status}}",
+              "rightValue": "COUNTED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "43f89f4f-eb68-41fc-96ac-30917f11a6b3"
+            },
+            {
+              "leftValue": "={{$json.linkedin_reported_job_count}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "id": "daad8d30-4348-466d-b419-662f5cc118ab"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cc8ab37a-c427-4319-8b32-a7633a3a9cb5",
+      "name": "IF Count > 0",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -3184,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "apify_actor_search_query",
+              "value": "={{ $json[\"Company Name\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "apify_actor_location",
+              "value": "={{ $json.Location }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "apify_actor_company_id",
+              "value": "={{$json.linkedin_company_id}}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "apify_actor_max_items",
+              "value": "={{$json.linkedin_reported_job_count}}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6cbc968-a342-4847-8eb9-b661ad47ce7e",
+      "name": "Set - Build Apify Input (edit field names here)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2992,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/worldunboxer~rapid-linkedin-scraper/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timeout",
+              "value": "300"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"location\": \"{{$json.apify_actor_location}}\",\n  \"company_names\": [\"{{$json.apify_actor_search_query}}\"],\n\"posted_within\": \"Past 24 hours\",\n  \"jobs_entries\":{{ $json.apify_actor_max_items < 10 ? 10 : $json.apify_actor_max_items }}\n\n}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "f310667c-c21f-4d03-93a1-176b96559981",
+      "name": "HTTP - Run Apify Actor (sync, get dataset items)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2704,
+        512
+      ],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "LgcAlqJ6jmQVGgn7",
+          "name": "Query Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// === STEP 3: Map each raw Apify job item to the target data model ===\n// Field names confirmed directly from a real Apify dataset sample (snake_case).\n\nconst original = $('Set - Build Apify Input (edit field names here)').item.json;\nconst job = $json;\n\nreturn {\n  json: {\n    job_id: job.job_id || null,\n    job_url: job.job_url || job.apply_url || null,\n    job_title: job.job_title || null,\n    company_name: job.company_name || original.apify_actor_search_query,\n    company_url: job.company_url || null,\n    location: job.location || original.apify_actor_location,\n    time_posted: job.time_posted || null,\n    num_applicants: job.num_applicants || null,\n    salary_range: job.salary_range || null,\n    job_description: job.job_description || null,\n    job_description_raw_html: job.job_description_raw_html || null,\n    seniority_level: job.seniority_level || null,\n    employment_type: job.employment_type || null,\n    linkedin_company_id: original.apify_actor_company_id,\n    linkedin_reported_job_count: original.apify_actor_max_items,\n    scrape_timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "f9e3d339-0712-47a8-954c-bbfe581f2d86",
+      "name": "Code - Map Job Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2448,
+        512
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "d189a4ed-079a-45a2-b644-daf08cc48ae8",
+      "name": "Aggregate - Collect All Jobs For Row",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -2208,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// === STEP 4: Verify LinkedIn count == Apify returned count ===\nconst row = $('Set - Build Apify Input (edit field names here)').item.json;\nconst allJobsField = Object.keys($json).find(k => Array.isArray($json[k])) || 'data';\nconst jobs = $json[allJobsField] || [];\n\nconst linkedinCount = row.apify_actor_max_items;\nconst apifyCount = jobs.length;\nconst match = linkedinCount === apifyCount;\n\nreturn [{\n  json: {\n    company_name: row.apify_actor_search_query,\n    location: row.apify_actor_location,\n    linkedin_company_id: row.apify_actor_company_id,\n    linkedin_reported_job_count: linkedinCount,\n    apify_returned_job_count: apifyCount,\n    verification_status: match ? 'MATCH' : 'MISMATCH',\n    status: match ? 'DONE' : 'FAILED_MISMATCH',\n    error_message: match ? '' : `Count mismatch: LinkedIn=${linkedinCount} vs Apify=${apifyCount}. Possible causes: jobs changed between COUNT and SCRAPE, pagination undercount, or actor input field names need correction.`,\n    scrape_timestamp: new Date().toISOString(),\n    jobs\n  }\n}];\n"
+      },
+      "id": "2d33e00d-e0a7-4ef9-afad-6213b2e77f91",
+      "name": "Code - Verify Counts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1968,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "jobs",
+        "options": {}
+      },
+      "id": "12dfe327-17fa-498f-b35b-ac1fc9c149d7",
+      "name": "Split Out - One Item Per Job",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1760,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_8>",
+          "mode": "list",
+          "cachedResultName": "TEST_Jobs_template",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_8>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 62423166,
+          "mode": "list",
+          "cachedResultName": "Jobs_template",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_8>/edit#gid=62423166"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "job_id": "={{ $json.job_id }}",
+            "job_url": "={{ $json.job_url }}",
+            "job_title": "={{ $json.job_title }}",
+            "company_name": "={{ $json.company_name }}",
+            "company_url": "={{ $json.company_url }}",
+            "location": "={{ $json.location }}",
+            "time_posted": "={{ $json.time_posted }}",
+            "num_applicants": "={{ $json.num_applicants }}",
+            "salary_range": "={{ $json.salary_range }}",
+            "job_description": "={{ $json.job_description }}",
+            "linkedin_company_id": "={{ $json.linkedin_company_id }}",
+            "linkedin_reported_job_count": "={{ $json.linkedin_reported_job_count }}",
+            "scrape_timestamp": "={{ $json.scrape_timestamp }}"
+          },
+          "matchingColumns": [
+            "job_id"
+          ],
+          "schema": [
+            {
+              "id": "job_id",
+              "displayName": "job_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job_url",
+              "displayName": "job_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job_title",
+              "displayName": "job_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_name",
+              "displayName": "company_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_url",
+              "displayName": "company_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "time_posted",
+              "displayName": "time_posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "num_applicants",
+              "displayName": "num_applicants",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "salary_range",
+              "displayName": "salary_range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "job_description",
+              "displayName": "job_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_company_id",
+              "displayName": "linkedin_company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_reported_job_count",
+              "displayName": "linkedin_reported_job_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "scrape_timestamp",
+              "displayName": "scrape_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "4e0c8f76-f038-48c7-9124-9ccbc8758ac0",
+      "name": "Google Sheets - Upsert Jobs (dedup by job_id)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        -1568,
+        416
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zMG9mUTv1sPcsltq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_7>",
+          "mode": "list",
+          "cachedResultName": "TEST_company",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_7>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "compa",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_7>/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company Name": "={{ $json.company_name }}",
+            "Location": "={{ $json.location }}",
+            "linkedin_company_id": "={{ $json.linkedin_company_id }}",
+            "linkedin_reported_job_count": "={{ $json.linkedin_reported_job_count }}",
+            "apify_returned_job_count": "={{ $json.apify_returned_job_count }}",
+            "status": "={{ $json.status }}",
+            "error_message": "={{ $json.error_message }}",
+            "scrape_timestamp": "={{ $json.scrape_timestamp }}"
+          },
+          "matchingColumns": [
+            "Company Name"
+          ],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "\tSub Companies",
+              "displayName": "\tSub Companies",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_company_id",
+              "displayName": "linkedin_company_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_reported_job_count",
+              "displayName": "linkedin_reported_job_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "apify_returned_job_count",
+              "displayName": "apify_returned_job_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "scrape_timestamp",
+              "displayName": "scrape_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a8fd3de5-a04d-46f4-b413-203166d3eff0",
+      "name": "Google Sheets - Update Status Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        -1760,
+        608
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zMG9mUTv1sPcsltq",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "company_name",
+              "value": "={{$json['Company Name']}}",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "location",
+              "value": "={{$json.Location}}",
+              "type": "string"
+            },
+            {
+              "id": "b3",
+              "name": "linkedin_company_id",
+              "value": "={{$json.linkedin_company_id || ''}}",
+              "type": "string"
+            },
+            {
+              "id": "b4",
+              "name": "linkedin_reported_job_count",
+              "value": "=0",
+              "type": "number"
+            },
+            {
+              "id": "b5",
+              "name": "apify_returned_job_count",
+              "value": "=0",
+              "type": "number"
+            },
+            {
+              "id": "b6",
+              "name": "status",
+              "value": "=SKIPPED_NO_JOBS",
+              "type": "string"
+            },
+            {
+              "id": "b7",
+              "name": "error_message",
+              "value": "={{ $json.error_message }}",
+              "type": "string"
+            },
+            {
+              "id": "b8",
+              "name": "scrape_timestamp",
+              "value": "={{$now.toISO()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e3403df4-a668-4cc6-98be-ba18172bd794",
+      "name": "Set - Mark Skipped (0 jobs, no Apify call)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2992,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "company_name",
+              "value": "={{$json['Company Name'] || $json.matched_company_name}}",
+              "type": "string"
+            },
+            {
+              "id": "c2",
+              "name": "location",
+              "value": "={{$json.Location}}",
+              "type": "string"
+            },
+            {
+              "id": "c3",
+              "name": "linkedin_company_id",
+              "value": "={{$json.linkedin_company_id || ''}}",
+              "type": "string"
+            },
+            {
+              "id": "c4",
+              "name": "linkedin_reported_job_count",
+              "value": "=0",
+              "type": "number"
+            },
+            {
+              "id": "c5",
+              "name": "apify_returned_job_count",
+              "value": "=0",
+              "type": "number"
+            },
+            {
+              "id": "c6",
+              "name": "status",
+              "value": "={{$json.status}}",
+              "type": "string"
+            },
+            {
+              "id": "c7",
+              "name": "error_message",
+              "value": "={{$json.error_message}}",
+              "type": "string"
+            },
+            {
+              "id": "c8",
+              "name": "scrape_timestamp",
+              "value": "={{$now.toISO()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c740f454-c337-4e41-876b-bec02f87d758",
+      "name": "Set - Mark Failed (resolution/count error)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1392,
+        2016
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual / Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Read Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Read Companies": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Companies (1 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Companies (1 at a time)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code - Resolve Company ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Resolve Company ID": {
+      "main": [
+        [
+          {
+            "node": "Code - Count Actual LinkedIn Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Count Actual LinkedIn Jobs": {
+      "main": [
+        [
+          {
+            "node": "IF Count > 0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Count > 0": {
+      "main": [
+        [
+          {
+            "node": "Set - Build Apify Input (edit field names here)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set - Mark Skipped (0 jobs, no Apify call)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Build Apify Input (edit field names here)": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Run Apify Actor (sync, get dataset items)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Run Apify Actor (sync, get dataset items)": {
+      "main": [
+        [
+          {
+            "node": "Code - Map Job Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Map Job Fields": {
+      "main": [
+        [
+          {
+            "node": "Aggregate - Collect All Jobs For Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate - Collect All Jobs For Row": {
+      "main": [
+        [
+          {
+            "node": "Code - Verify Counts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Verify Counts": {
+      "main": [
+        [
+          {
+            "node": "Split Out - One Item Per Job",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets - Update Status Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out - One Item Per Job": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Upsert Jobs (dedup by job_id)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Mark Skipped (0 jobs, no Apify call)": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Companies (1 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Mark Failed (resolution/count error)": {
+      "main": [
+        []
+      ]
+    },
+    "Google Sheets - Update Status Row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Companies (1 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "42fd5ba9-0709-4c25-adac-883b9d51c18e",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "tXS0tsAbvDjctZ9I",
+  "tags": []
+}

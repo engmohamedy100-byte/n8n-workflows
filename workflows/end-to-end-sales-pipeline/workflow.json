@@ -1,0 +1,5096 @@
+{
+  "name": "AI Sales Automation  End_To_End",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fc44a289-8c50-4682-8b50-c2e63cfc6514",
+              "leftValue": "={{ $('Get row(s) in sheet1').item.json.email }}",
+              "rightValue": "/",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f8e675e8-99cc-4c30-92e3-e08a659cff9b",
+              "leftValue": "={{ $('Get row(s) in sheet1').item.json.companyDomain }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        3600,
+        1776
+      ],
+      "id": "22ada9ea-f547-4c93-bb93-da5d0ba685d5",
+      "name": "Only Websites & Emails1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3824,
+        1776
+      ],
+      "id": "5db93eac-1c7f-4c18-bcce-e9e5a36ce731",
+      "name": "Loop Over Items1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79b10db1-036a-419e-9eb6-2dd5e773420c",
+              "name": "name",
+              "value": "={{ $json.NAME}}",
+              "type": "string"
+            },
+            {
+              "id": "85ef5e23-1eb4-4d06-b9dd-e879a470c819",
+              "name": "email",
+              "value": "={{ $json.EMAIL }}",
+              "type": "string"
+            },
+            {
+              "id": "32959132-2f35-4c6f-b8d4-9e101bbfc07a",
+              "name": "website",
+              "value": "={{$json.WEBSITE }}",
+              "type": "string"
+            },
+            {
+              "id": "da7f84a0-016a-46fa-8d26-a948aa34d990",
+              "name": "company name",
+              "value": "={{ $json['COMPANY Name'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4064,
+        1472
+      ],
+      "id": "26361d02-d99a-4e67-b12a-b34e7695d5b1",
+      "name": "Data1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=## ROLE\nYou are our company sales expert. Your role is to prepare cold emails to send to leads.\n\nWe just scraped a series of web pages for a business called {{ $('Data1').item.json['company name'] }}.\n\n## CONTEXT VARIABLES\n- company_name_raw: {{ $('Data1').item.json['company name'] }}\n\n## TASK\nTake the provided page summaries and craft concise, personalized openers that feel derived from the company’s own site/news/services (never the individual). Do not invent facts.\n\n## OUTPUT\nReturn strict JSON with two keys \"draft\", \"company_summary\".\n\n## RULES\n- Company-centric only; never reference personal social profiles.\n- Positive framing—do not point out problems or critiques.\n- Offer **only** a brief meeting (10–15 minutes) to discuss more; no proposals or attachments.\n- Use a professional yet friendly tone.\n- Focus on small, non-obvious details from summaries (section names, microcopy, page structures).\n- Keep it short (2 paragraphs 4–6 sentences per draft).\n- Choose any mentions from our services only: Branding, Content Creation, Motion Graphics, Marketing, Campaigns, Photography, Packaging, Websites.\n- Shorten the company name wherever possible (say, \"XYZ\" instead of \"XYZ Agency\"). More examples: \"Love AMS\" instead of \"Love AMS Professional Services\", \"Love Mayo\" instead of \"Love Mayo Inc.\", etc.\n- Do not fabricate numbers, clients, or results.\n **Plain text only**: no `\\n`, `\\\\n`, `<br>`, or markdown formatting.\n- Must be ready to paste directly into an email editor.\n\n## TEMPLATES (use as patterns; adapt language to the specific summary)\n\n{\n  \"draft\": \"I spent some time on {site_ref_1} and really liked the {micro_detail_from_site} touch—it sets a strong tone for your digital presence. It’d be great to compare notes from those pages and hear what’s next on your roadmap.\\\\n\\\\nOpen to a quick 10–15 min call?\",\n\n  \"draft\": \"Your update on {news_or_blog_item} pairs nicely with what’s outlined on {services_or_solutions_page}. There’s a clear narrative building across the site, and I’d love to share a couple of lightweight ideas that build on that momentum.\\\\n\\\\nWould a brief 10–15 min chat be useful?\",\n\n  \"draft\": \"While browsing {collection_or_category}, the {micro_detail_from_gallery} detail stood out—it gives the catalog a distinctive feel. I’d enjoy a short conversation about how that theme could carry across your key pages and channels.\\\\n\\\\nUp for a quick 10–15 min call?\"\n}\n\n## OUR PROFILE\nWe provide: Branding, Content Creation, Motion Graphics, Marketing, Campaigns, Photography, Packaging, Websites.\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        5344,
+        1456
+      ],
+      "id": "821af396-8f2a-433c-b492-fc17ca5694cc",
+      "name": "Basic LLM Chain4",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "contact list - Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_2>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 903295803,
+          "mode": "list",
+          "cachedResultName": "Output 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_2>/edit#gid=903295803"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "COMPANY Name": "={{ $('Only Websites & Emails1').item.json['COMPANY Name'] }}",
+            "NAME": "={{ $('Only Websites & Emails1').item.json.NAME }}",
+            "EMAIL": "={{ $('Only Websites & Emails1').item.json.EMAIL }}",
+            "WEBSITE": "={{ $('Only Websites & Emails1').item.json.WEBSITE }}",
+            "DRAFT": "=Hey {{ $('Edit Fields3').item.json.name }},\n\n{{ $json.draft.replace(/\\\\n/g, '\\n').replaceAll('—', \", \") }}",
+            "ACTION": "Pending",
+            "SUMMARY": "={{$json.company_summary}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "COMPANY Name",
+              "displayName": "COMPANY Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NAME",
+              "displayName": "NAME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "WEBSITE",
+              "displayName": "WEBSITE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DRAFT",
+              "displayName": "DRAFT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ACTION",
+              "displayName": "ACTION",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NOTES",
+              "displayName": "NOTES",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "SUMMARY",
+              "displayName": "SUMMARY",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "NOTION ID",
+              "displayName": "NOTION ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        5760,
+        1584
+      ],
+      "id": "93ba9b98-004f-45df-9c35-389df64e7503",
+      "name": "Add Row1",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=name: {{ $('Data1').item.json.name }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a name extractor. Your task is to normalize a provided name so it can be safely included in an email.\n\n##OUTPUT FORMAT (Strict JSON)\n{\n  \"name\": \"Karim Nabil\"\n}\n\n##INSTRUCTIONS\n\n**Empty input\nIf the provided name is missing, null, or only whitespace → return:\n{ \"name\": \"\" }\nCapitalization\n\n**Always capitalize the first letter of each word in the name.\nExamples:\nkarim → Karim\nkarim nabil → Karim Nabil\naHMeD saLaH → Ahmed Salah\n\n**Company / Department / Generic addresses\nIf the name is one of the following (case-insensitive), return empty:\ninfo, information, marketing, sales, support, admin, team, hr, careers, recruitment, recruiting, jobs,\nhello, contact, enquiries, billing, finance, accounting, customer service, service, help, noreply, no-reply,\nwebmaster, it, ict, office, reception, secretary, gm, ceo, cto, coo, cfo, founder, owner, manager,\ndepartment, dept, operations, ops, social, media, pr, csr\nExample:\nInput: support →\n{ \"name\": \"\" }\n\n##Symbols, emails, or invalid strings\nIf the input contains @, numbers only, or looks like an email/placeholder → return empty.\nExample: support@company.com → { \"name\": \"\" }\n\n##Valid personal names only\nOutput should contain only the cleaned, capitalized personal name."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        4704,
+        1456
+      ],
+      "id": "3c951434-b366-4adb-80ff-347a75622d29",
+      "name": "Basic LLM Chain5",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c4705133-f91c-4e4a-a457-cfafc94c1e7e",
+              "name": "name",
+              "value": "={{ $json.name|| \"Team\"}} ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5088,
+        1456
+      ],
+      "id": "885e2e0f-ae6d-468f-8a49-69d0911a1a99",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "formTitle": "Workflow Launcher",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Starting Row",
+              "fieldType": "number",
+              "placeholder": "e.g. 50",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        2256,
+        1776
+      ],
+      "id": "0e49dab4-07a2-4701-a48e-ea462f9b4042",
+      "name": "On form submission1",
+      "webhookId": "99111cbe-81ad-4e37-9596-a00e2461c755"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "Contact-Lest-Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1516478603,
+          "mode": "list",
+          "cachedResultName": "Main-Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit#gid=1516478603"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRange",
+              "firstDataRow": "={{ $json[\"Starting Row\"] }}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2928,
+        1776
+      ],
+      "id": "7fb29d86-29d5-4cd7-94d6-c69bf6996c02",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 50
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        3152,
+        1776
+      ],
+      "id": "232ece05-75cc-43e2-94df-fa35166509a0",
+      "name": "Limit1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "Contact-Lest-Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sample1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "COMPANY Name": "={{ $json.companyName }}",
+            "NAME": "={{ $json.fullName }}",
+            "EMAIL": "={{ $json.email }}",
+            "WEBSITE": "=https://{{ $json.companyDomain }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "COMPANY Name",
+              "displayName": "COMPANY Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "NAME",
+              "displayName": "NAME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "WEBSITE",
+              "displayName": "WEBSITE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "DRAFT",
+              "displayName": "DRAFT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3392,
+        1776
+      ],
+      "id": "882e92ed-57ae-4cd9-be3c-65fe859cd68c",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "Contact-Lest-Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sample1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit#gid=0"
+        },
+        "clear": "specificRows",
+        "startIndex": 2,
+        "rowsToDelete": 50
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2480,
+        1776
+      ],
+      "id": "f3fa4025-a732-471b-9f25-35bc27a05fa1",
+      "name": "Clear sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "Contact-Lest-Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 376075289,
+          "mode": "list",
+          "cachedResultName": "Output1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit#gid=376075289"
+        },
+        "clear": "specificRows",
+        "startIndex": 2,
+        "rowsToDelete": 50
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2704,
+        1776
+      ],
+      "id": "67da6887-65ae-4ad9-84ea-d28c05f0946f",
+      "name": "Clear sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Lead Website: {{ $json.website }}\nLead Company Name: {{ $json['company name'] }}",
+        "options": {
+          "systemMessage": "=You are a part of our Sales team. Your role is to search online for any avaiable data about a certain lead. \n\n##INSTRUCTIONS\n**Fetch data related to our services. That we can sell them to these leads.\n**Don't get too much text only needed data.\n**Always use your web_search tool.\n\n##Services\n**Motion Graphics\n**Branding\n**Content Generation\n\n##OUTPUT (Text Report Including)\nExecutive Summary\nRelated Information\nSales Insights\n\n##TOOLS\n**web_search tool: use it to search online"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        4304,
+        1472
+      ],
+      "id": "a5fedef5-6701-4de3-8a1f-bbf0da35a209",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": "poolside/laguna-xs-2.1:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        4304,
+        1696
+      ],
+      "id": "706816b1-9c00-4d13-a4e7-b3fd1521dc24",
+      "name": "OpenRouter Chat Model3",
+      "credentials": {
+        "openRouterApi": {
+          "id": "CIqJHj23CakfoVmt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "<SERPER_API_KEY>"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{$fromAI(\"query\")}}"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        4448,
+        1696
+      ],
+      "id": "0a55395d-fae4-4d83-9d43-86e1ee8f3b37",
+      "name": "web_search"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        4704,
+        1680
+      ],
+      "id": "435ce4c2-cef1-4a6f-bf15-e0867e6faa97",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "mmX3lBuFbUQHnOEh",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        5344,
+        1664
+      ],
+      "id": "a45522e5-2b29-4280-8242-17d2eb4e205a",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "mmX3lBuFbUQHnOEh",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "Contact-Lest-Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 376075289,
+          "mode": "list",
+          "cachedResultName": "Output1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit#gid=376075289"
+        },
+        "event": "rowUpdate",
+        "options": {
+          "columnsToWatch": [
+            "ACTION"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        2080
+      ],
+      "id": "1fe8a15b-2147-4d68-b2c5-6b27198afd7f",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "QBSHFdcDWdColaRG",
+          "name": "Google Sheets Trigger account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5de46b62-d426-4b2d-9331-7f5e91556182",
+              "leftValue": "={{ $json.ACTION }}",
+              "rightValue": "Sent",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "531a6a2f-95bf-46cd-abd5-06250b702ceb",
+              "leftValue": "={{ $json['NOTION ID'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2464,
+        2080
+      ],
+      "id": "65f7ab0b-49b7-45dd-b3b0-7045563cabe8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_6>",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://app.notion.com/p/<NOTION_PAGE_ID_1>"
+        },
+        "title": "={{ $json['COMPANY Name'] }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $json.EMAIL }}"
+            },
+            {
+              "key": "Name|rich_text",
+              "textContent": "={{ $json.NAME }}"
+            },
+            {
+              "key": "Last com|date",
+              "date": "={{ $now }}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "Email Sent"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        3104,
+        2080
+      ],
+      "id": "86118950-8aaa-4014-b5cd-a63ef8145feb",
+      "name": "Create a database page",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2784,
+        2064
+      ],
+      "id": "e7dcc2fa-90b1-464c-adae-57eeaa7d0989",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "Contact-Lest-Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 376075289,
+          "mode": "list",
+          "cachedResultName": "Output1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<GOOGLE_RESOURCE_ID_3>/edit#gid=376075289"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 0,
+            "EMAIL": "={{ $json.property_email }}",
+            "NOTION ID": "={{ $json.id }}"
+          },
+          "matchingColumns": [
+            "EMAIL"
+          ],
+          "schema": [
+            {
+              "id": "COMPANY Name",
+              "displayName": "COMPANY Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "NAME",
+              "displayName": "NAME",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "WEBSITE",
+              "displayName": "WEBSITE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DRAFT",
+              "displayName": "DRAFT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ACTION",
+              "displayName": "ACTION",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "NOTES",
+              "displayName": "NOTES",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SUMMARY",
+              "displayName": "SUMMARY",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "NOTION ID",
+              "displayName": "NOTION ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3392,
+        2080
+      ],
+      "id": "54e7b58d-961c-4f4e-924e-a1f1d732ea8f",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MWMSpTm3FLHExOgO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "oAuth2",
+        "event": "pagedUpdatedInDatabase",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "CRM Database",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_2>"
+        }
+      },
+      "type": "n8n-nodes-base.notionTrigger",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        2432
+      ],
+      "id": "fae1e706-c281-4873-9e3a-922e1684dc0b",
+      "name": "Notion Trigger",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Status }}",
+                    "rightValue": "Email Sent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ee4f3eb2-9776-4ee2-b9c2-b9753c95b48b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Go"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "31fc474d-b72e-4a9c-9003-2788340cf7a0",
+                    "leftValue": "={{ $json.Status }}",
+                    "rightValue": "Email Follow-up Sent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Drop"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a2a726fa-6fcd-4632-a05f-2b9e2d5df61c",
+                    "leftValue": "={{ $json.Status }}",
+                    "rightValue": "Meeting Link Sent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Meeting Follow-up"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3168,
+        2416
+      ],
+      "id": "b7c97b2b-f728-4c15-9d6e-c01ff4e7cacf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Notion Trigger').item.json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Drop"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        3600,
+        2592
+      ],
+      "id": "24d06b66-e7bd-4f87-a539-65952290017a",
+      "name": "Update a database page",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Notion Trigger').item.json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Email Follow-up Sent"
+            },
+            {
+              "key": "Last Communication|date",
+              "date": "={{ $now }}",
+              "timezone": "Africa/Cairo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        3712,
+        2400
+      ],
+      "id": "6591ecf0-cdcc-4230-b367-cc19f9600aa9",
+      "name": "Update a database page1",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: Quick note, {{ $json.Name }}",
+        "message": "=<!DOCTYPE html> <html> <head>   <meta charset=\"UTF-8\">   <title>Gentle Reminder</title> </head> <body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f9f9f9; padding: 20px;\">   <table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">     <tr>       <td style=\"padding: 20px;\">                  <p style=\"font-size: 16px; margin-bottom: 16px;\">Dear {{ $json.Name }},</p>                  <p style=\"font-size: 15px; margin-bottom: 16px;\">           I hope this message finds you well.            I just wanted to kindly follow up regarding my previous email.            When you have a chance, I would greatly appreciate your update or guidance on the matter.          </p>          <p style=\"font-size: 15px; margin-bottom: 16px;\">           Please let me know if you need any additional details from my side.          </p>                  <p style=\"font-size: 15px; margin-bottom: 24px;\">           Thank you for your time and attention, and I look forward to hearing from you.         </p>                  <p style=\"font-size: 15px; margin-bottom: 8px;\">Best regards,</p>         <p style=\"font-size: 15px; font-weight: bold; margin: 0;\">Karim Nabil</p>         <p style=\"font-size: 14px; margin: 0;\">AI Product Manager / iWork</p>         <p style=\"font-size: 14px; margin: 0;\">+21020000</p>        </td>     </tr>   </table> </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3488,
+        2400
+      ],
+      "id": "9c8c11e1-57f5-4f7e-8380-53b89f673171",
+      "name": "Create a draft",
+      "webhookId": "a9c6c76f-f881-48e3-8c68-ee4537a10696",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=Please follow-up with {{ $json.Name }} whose email is {{ $json.Email }}.\nHe was interested but didn't book a meeting.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3440,
+        2752
+      ],
+      "id": "85844f47-2ed0-4560-a7ec-9151cac756cd",
+      "name": "Send a text message",
+      "webhookId": "b3c3798c-e2c2-433a-adea-1fdd94cd8bcf",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2480,
+        2432
+      ],
+      "id": "fb212ffc-ce7c-4554-8c88-9dd9cb85d74e",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "66793760-2107-4f72-afce-414b92a3758f",
+              "leftValue": "={{ $json['Next Communication'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2768,
+        2448
+      ],
+      "id": "f50af576-86b8-4f42-87dc-cfe3c19a18bb",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        2192,
+        3280
+      ],
+      "id": "cdf0fdc2-0951-45a3-a428-b49773fd55f4",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yEixcOcUAXDP0bFE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Gmail Trigger').item.json.snippet }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You have recieved an email of our company lead. We want to classify it to {\"Interested\", \"Not Interested\"}.\n\n\"Interested\": Means that we can send him another email. Because he didn't say he is not interested or don't message me again."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        3280,
+        3264
+      ],
+      "id": "6547c9f0-3d3e-452c-9b9b-f3af47743ea6",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "Team Tasks",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_3>"
+        },
+        "title": "Karim Nabil",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $('Edit Fields1').item.json.email }}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "Meeting Link Sent"
+            },
+            {
+              "key": "Reply|rich_text",
+              "textContent": "={{ $('Edit Fields1').item.json.email_body }}"
+            },
+            {
+              "key": "Focal Person|rich_text",
+              "textContent": "={{ $('Edit Fields1').item.json.focal_person }}"
+            },
+            {
+              "key": "Company Name|rich_text",
+              "textContent": "={{ $('Edit Fields1').item.json.company_name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        4496,
+        3136
+      ],
+      "id": "cb7623a8-b9c1-4fc5-b545-340206b47a6f",
+      "name": "Create a database page1",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dea7236b-9bdf-40d8-9df8-af2d4762c7ab",
+              "leftValue": "={{ $json.Subject }}",
+              "rightValue": "Re: Quick note",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2400,
+        3280
+      ],
+      "id": "d8521a6e-d508-476f-82a2-14df219ff4b5",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "Test Database",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_2>"
+        },
+        "limit": 2,
+        "filterType": "json",
+        "filterJson": "={\n  \"property\": \"Email\",\n  \"email\": { \"equals\": \"{{($json.From).match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i)?.[0]\n    ?.toLowerCase() || \"\" }}\" }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2688,
+        3264
+      ],
+      "id": "d3642877-972a-4ca4-9d52-c80d008680da",
+      "name": "Get many database pages",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c3a23123-5501-40d9-8a29-63e87e565599",
+              "name": "notion_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "4b568782-d6e4-428b-a509-766eb85c8a92",
+              "name": "email",
+              "value": "={{\n(() => {\n  const s = $('Gmail Trigger').item.json.From || '';\n  const inBrackets = s.match(/<([^>]+)>/);\n  const candidate = inBrackets ? inBrackets[1] : s;\n  const m = candidate.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i);\n  return m ? m[0] : '';\n})()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "e0dc6e57-755e-4fc5-896b-34afb15b8aee",
+              "name": "email_body",
+              "value": "={{\n(() => {\n  const s = $('Gmail Trigger').item.json.snippet || '';\n  // Decode a few entities\n  const dec = s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');\n  // Cut off quoted thread markers like: \"On Sat, ... wrote:\"\n  const i = dec.search(/\\sOn .*wrote:/i);\n  const head = i !== -1 ? dec.slice(0, i) : dec;\n  // Trim and collapse spaces\n  return head.replace(/\\s+/g,' ').trim();\n})()\n}}\n",
+              "type": "string"
+            },
+            {
+              "id": "23cf71fc-53e6-4460-955f-8cff38b5082e",
+              "name": "focal_person",
+              "value": "={{ $json.property_name }}",
+              "type": "string"
+            },
+            {
+              "id": "3d949b1e-2fd7-4685-bef6-d174db0404c1",
+              "name": "company_name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2960,
+        3264
+      ],
+      "id": "547e6deb-b2c8-4352-8ae2-3cfcdec6b703",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        3280,
+        3472
+      ],
+      "id": "c7e596e0-8052-418e-853b-38fea24a1a60",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "27e3y8drNx1o0RQz",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"state\": {\n\t\t\t\"type\": \"string\",\n            \"description\": \"Email classification by AI\"\n\t\t}\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3424,
+        3472
+      ],
+      "id": "34b46357-0e9d-45c7-9f99-d68082dc923f",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "Interested",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9bbd8614-0dba-4999-9c16-c6966e56a81f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "interested"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2471a9de-6ffe-49c7-bf2e-0395d04cdd3e",
+                    "leftValue": "={{ $json.output.state }}",
+                    "rightValue": "Not interested",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "not"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3632,
+        3264
+      ],
+      "id": "e1e74cb5-0ecd-486c-8682-c8dad3d453a6",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields1').item.json.notion_id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Meeting Link Sent"
+            },
+            {
+              "key": "Last Communication|date",
+              "date": "={{ $now }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        4032,
+        3136
+      ],
+      "id": "3c113e0a-3ad4-44ce-8095-4700246babc2",
+      "name": "Update a database page4",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.From }}",
+        "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+        "message": "=<!doctype html> <html>   <body style=\"margin:0;padding:0;background:#f6f7fb;\">     <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background:#f6f7fb;\">       <tr>         <td align=\"center\" style=\"padding:24px;\">           <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #eee;\">             <tr>               <td style=\"padding:24px 28px;font-family:Arial,Helvetica,sans-serif;color:#222;\">                 <p style=\"margin:0 0 12px;font-size:16px;\">Hi {{ $json.property_name }},</p>                 <p style=\"margin:0 0 16px;font-size:14px;line-height:1.6;\">                   Thanks for getting back to me—really appreciate your time.                   I’d love to walk you through how we can help and answer any questions.                   Please pick a time that suits you:                 </p>                  <!-- Button -->                 <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:18px 0 8px;\">                   <tr>                     <td align=\"center\">                       <a href=\"https://calendar.app.google/BNxH2DzKbCqFJja68\"                          style=\"display:inline-block;padding:12px 20px;background:#0b5fff;color:#ffffff;                                 text-decoration:none;border-radius:8px;font-weight:bold;font-size:14px;\">                         Book a Meeting                       </a>                     </td>                   </tr>                 </table>                  <!-- Fallback link -->                 <p style=\"margin:8px 0 16px;font-size:12px;color:#555;\">                   Or copy this link into your browser:<br>                   <a href=\"https://calendar.app.google/BNxH2DzKbCqFJja68\" style=\"color:#0b5fff;\">                     https://calendar.app.google/BNxH2DzKbCqFJja68                   </a>                 </p>                  <p style=\"margin:0 0 4px;font-size:14px;\">Looking forward to speaking!</p>                  <p style=\"margin:16px 0 0;font-size:13px;color:#444;line-height:1.5;\">                   Best regards,<br>                   <strong>Karim Nabil</strong><br>                   AI Product Manager — n8n with Karim                 </p>               </td>             </tr>           </table>            <!-- tiny footer spacing -->           <div style=\"height:24px;line-height:24px;font-size:0;\">&nbsp;</div>         </td>       </tr>     </table>   </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4288,
+        3136
+      ],
+      "id": "03f3a680-0fd3-4f7f-8e99-68cb2e89e7e5",
+      "name": "Send a message1",
+      "webhookId": "f13a18bc-4251-4b9b-827d-b7965d477e94",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yEixcOcUAXDP0bFE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields1').item.json.notion_id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Drop"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        4032,
+        3440
+      ],
+      "id": "8beb44f1-8794-47e6-a33c-6290c71102ae",
+      "name": "Update a database page5",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "You have a new task. Please check Notion.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4704,
+        3136
+      ],
+      "id": "5d30eb7f-3218-4bac-b618-2628ce3082d5",
+      "name": "Send a text message1",
+      "webhookId": "4c082204-f750-4728-91f4-cd013ac81c10",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_4>",
+          "mode": "list",
+          "cachedResultName": "Proposal Template",
+          "cachedResultUrl": "https://docs.google.com/document/d/<GOOGLE_RESOURCE_ID_4>/edit?usp=drivesdk"
+        },
+        "name": "={{ $('On form submission').item.json['Company Name'] }} - Proposal",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3824,
+        4096
+      ],
+      "id": "c96999f3-e2c9-4f45-b592-282c48286811",
+      "name": "Copy file",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "DeojzxiEqVPnggRt",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "[Client Name]",
+              "replaceText": "={{ $('On form submission').item.json['Lead Name'] }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Company Name]",
+              "replaceText": "={{ $('On form submission').item.json['Company Name'] }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[problem 1]",
+              "replaceText": "={{ $('Basic LLM Chain2').item.json.problems[0] }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[problem 2]",
+              "replaceText": "={{ $('Basic LLM Chain2').item.json.problems[1] }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[problem 3]",
+              "replaceText": "={{ $('Basic LLM Chain2').item.json.problems[2] }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Services]",
+              "replaceText": "={{ $('Basic LLM Chain2').item.json.services }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Pricing Model]",
+              "replaceText": "={{ $('Basic LLM Chain2').item.json.pricing_model }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        4064,
+        4096
+      ],
+      "id": "78d8afa7-14a5-4af4-a3ab-ef275039f8f5",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "JF7QdmFaCFAknWSc",
+          "name": "Google Docs account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.documentId }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "proposal",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          },
+          "fileName": "proposal.pdf"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4304,
+        4096
+      ],
+      "id": "7d550605-bd40-4779-ac89-05c020b4c68f",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "DeojzxiEqVPnggRt",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "After Meeting Form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Agent Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Lead Interested?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company Name"
+            },
+            {
+              "fieldLabel": "Lead Name"
+            },
+            {
+              "fieldLabel": "Main Services to Offer",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "AI Agents"
+                  },
+                  {
+                    "option": "AI Automation"
+                  },
+                  {
+                    "option": "System Engineering"
+                  }
+                ]
+              },
+              "multiselect": true
+            },
+            {
+              "fieldLabel": "Prices to offer"
+            },
+            {
+              "fieldLabel": "Notes"
+            },
+            {
+              "fieldLabel": "Lead Email",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        4336
+      ],
+      "id": "4f12712e-096f-45ad-8627-f3b296079948",
+      "name": "On form submission",
+      "webhookId": "ee9d564e-8b52-4be3-981c-7e066973a718"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "Test Database",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_2>"
+        },
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Email|email",
+              "condition": "equals",
+              "emailValue": "={{ $json['Lead Email'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2416,
+        4336
+      ],
+      "id": "14fe0a98-afc1-4c85-95dd-453eca260be4",
+      "name": "Get many database pages2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('On form submission').item.json['Lead Interested?'] }}",
+                    "rightValue": "Yes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a3d1582c-b866-42fa-b1f0-709a04be6e84"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Yes"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "49606440-1bb3-4479-831c-3ce7893c8590",
+                    "leftValue": "={{ $('On form submission').item.json['Lead Interested?'] }}",
+                    "rightValue": "No",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "No"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3072,
+        4320
+      ],
+      "id": "a7d8f941-223f-46b5-b002-df59d9096d81",
+      "name": "Switch3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5cdb9e02-3699-4c97-a986-9280ca5dc6bf",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2688,
+        4336
+      ],
+      "id": "a9348977-61d4-4a5c-b20d-4d0da7a5af43",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=ERROR: This email doesn't exist: {{ $('On form submission').item.json['Lead Email'] }}\n\nYou have just filled the form with this email. Recheck!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2992,
+        4576
+      ],
+      "id": "fe712982-1ea0-4dd9-83f9-07e2ef479fe8",
+      "name": "Send a text message2",
+      "webhookId": "6aa33a2f-5cd1-4672-b9d1-3a474f84d997",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Drop"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        3424,
+        4496
+      ],
+      "id": "129feb2e-62a2-45c3-ae5c-44ada1085c25",
+      "name": "Update a database page6",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Company Name: {{ $('On form submission').item.json['Company Name'] }}\nFocal Person: {{ $('On form submission').item.json['Lead Name'] }}\nServices They are interested in: {{ $('On form submission').item.json['Main Services to Offer'] }}\nPrices we will offer: {{ $('On form submission').item.json['Prices to offer'] }}\nNotes from the meeting: {{ $('On form submission').item.json.Notes }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a proposal-generation assistant.  \nYour job is to take structured input from a sales agent (notes, client details, company name, focal person, services, and pricing) and output ONLY a valid JSON object.  Do not add explanations, text outside JSON, or comments.  Each JSON key corresponds to a placeholder in the proposal template.   \n\nTemplate Placeholders: \n- [Client Name] \n- [Company Name] \n- [problem 1], [problem 2], [problem 3] \n- [Services] \n- [Pricing Model]  \n\n### JSON Structure to Output: \n{   \"client_name\": \"<string – replaces [Client Name]>\",   \n\"company_name\": \"<string – replaces [Company Name]>\",   \n\"problems\": [\"<string – replaces [problem 1]>\",     \"<string – replaces [problem 2]>\",     \"<string – replaces [problem 3]>\"   ],\n\"services\": \"<string – replaces [Services] and make it more professional and explained>\",   \n\"pricing_model\": \"<string – replaces [Pricing Model]>\" }  \n\n### Rules: \n- Always return 3 problems (if fewer provided, expand briefly based on notes). \n- Keep phrasing professional and business-friendly. \n- Never output placeholders like [Client Name]; replace them with actual values from input. \n- Output must always be valid JSON.\n- Rewrite every thing in an aatractive way and sales encouraging"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        3440,
+        4096
+      ],
+      "id": "cf8fe139-b341-4a17-a4fb-cf194ab36767",
+      "name": "Basic LLM Chain2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        3440,
+        4256
+      ],
+      "id": "5539eab2-626b-466c-a0c1-fd7b26593efa",
+      "name": "OpenRouter Chat Model2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "27e3y8drNx1o0RQz",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Basic LLM Chain2').item.json.company_name }} - Proposal - AAutomation with Karim",
+        "message": "=Email to send to: {{ $('On form submission').item.json['Lead Email'] }}\n\nDear {{ $('On form submission').item.json['Lead Name'] }},\nIt was a great honor to meet you and to get to know more about {{ $('On form submission').item.json['Company Name'] }}.\nAs discussed, Please find attached our proposal.\n\nThanks,\nKarim Nabil\nBD Manager\n",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "proposal"
+              }
+            ]
+          },
+          "sendTo": "={{ $('On form submission').item.json['Lead Email'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4560,
+        4096
+      ],
+      "id": "5ff33c70-3657-4a2c-b2e5-8a617f279609",
+      "name": "Create a draft1",
+      "webhookId": "4bfa15bc-43c0-4c53-9343-c4e02d766491",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yEixcOcUAXDP0bFE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Get many database pages2').item.json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Proposal Ready"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        4784,
+        4096
+      ],
+      "id": "a6ebc478-4db1-4379-8368-c46dd2070eb0",
+      "name": "Update a database page7",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=Proposal for {{ $json.property_name }} is ready and drafted in your email for {{ $json.property_email }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4992,
+        4096
+      ],
+      "id": "dfb5cc59-abee-41d5-9233-c105498fbb1d",
+      "name": "Send a text message3",
+      "webhookId": "83e8fa8d-219c-4424-81d8-03a486977abc",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "<YOUR_GOOGLE_CALENDAR_ID>",
+          "mode": "list",
+          "cachedResultName": "XYZ Sales"
+        },
+        "triggerOn": "eventCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        3776
+      ],
+      "id": "e7a1dc47-c220-4ad5-887d-f803b549c9da",
+      "name": "Google Calendar Trigger",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "79fSEHdPrH3Drl78",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "Test Database",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_2>"
+        },
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Email|email",
+              "condition": "equals",
+              "emailValue": "={{ $json.attendees[0].email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2384,
+        3776
+      ],
+      "id": "9b324e23-a4fe-4c8c-806d-8a4d821aab13",
+      "name": "Get many database pages4",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Meeting Booked"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2672,
+        3776
+      ],
+      "id": "fff57814-c5a9-4436-9f70-fb59862f1b31",
+      "name": "Update a database page9",
+      "credentials": {
+        "notionOAuth2Api": {
+          "id": "a19Sfd0DBie7PxSM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=We have new booked meeting with {{ $json.property_name }} from {{ $json.name }} \nEmail: {{ $('Google Calendar Trigger').item.json.attendees[0].email }}\n\nAfter the meeting, fill this form:\nhttps://turtle-live-bat.ngrok-free.app/form/7e72980a-0e9c-4041-8623-ae8cf4463512\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2880,
+        3776
+      ],
+      "id": "4a9d5aec-4143-4d2e-98e9-340931512adc",
+      "name": "Send a text message5",
+      "webhookId": "100f3a9a-85eb-4483-9545-a65b33667758",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "Test Database",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_2>"
+        },
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Email|email",
+              "condition": "equals",
+              "emailValue": "={{ $json['Client Email'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2352,
+        5664
+      ],
+      "id": "c4067b44-6bf0-4269-a8f7-6e3241a85573",
+      "name": "Get many database pages1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Company Name: {{ $('Get many database pages1').item.json.name }}\nServices They are interested in: {{ $('On form submission2').item.json['Services Chosen'] }}\nPrices we will offer: {{ $('On form submission2').item.json.Price }}\nNotes from the contract: {{ $('On form submission2').item.json.Notes }}\nClient Focal Person: {{ $('If2').item.json.property_name }}\nClient Focal Person Title: {{ $('If2').item.json.property_title }}\nClient Email: {{ $json.property_email }}\nEffective Date: {{ $('On form submission2').item.json['Starting Date'] }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a JSON generator for a simple services agreement.\n\nOutput rules\n\nOutput one JSON object only. No prose, no markdown, no comments.\n\nUse the exact keys listed below. Do not add or remove keys.\n\nStrings default to \"\" if unknown. Numbers default to 0. Arrays may be empty.\n\nDates must be ISO format YYYY-MM-DD.\n\nAmounts are numbers (no currency symbols). Use the top-level \"currency\" for display.\n\nField definitions (keys and types)\n\nproject_name (string) → Understand data provided and generate a title for the project including services and client name [PROJECT_NAME]\n\nclient_legal_name (string) → fills [CLIENT_LEGAL_NAME] (also used in “For [COMPANY_LEGAL_NAME]”)\n\nclient_contact_email (string) → fills [CLIENT_CONTACT_EMAIL]\n\neffective_date (string, ISO date) → fills [EFFECTIVE_DATE]\n\nproject_summary_one_paragraph (string) → fills based on provided details generate a proffesional summary to the project in one paragraph [PROJECT_SUMMARY_ONE_PARAGRAPH]\n\nservices (array of strings) → fills [List of services] (supports 0, 1, or many). Provide a queck summary sentence for each service.\n\npricing_items (array of objects) → fills [Pricing]\n\neach item: { \"label\": string, \"amount\": number, \"type\": \"Recurring, fixed\" }\n\ncurrency (string, ISO 4217 like \"EGP\" or \"USD\")\n\ntotal_amount (number) → sum of all pricing_items[].amount (0 if unknown)\n\npayment_terms (string) → default: \"50% upfront; 50% upon acceptance within 7 days of final delivery.\"\n\nclient_signatory_name (string) → fills [COMPANY_SIGNATORY_NAME]\n\nclient_signatory_title (string) → fills [COMPANY_SIGNATORY_TITLE]\n\nclient_signature_date (string, ISO date) → fills blank date under “For [COMPANY_LEGAL_NAME]”\n\nprovider_signature_date (string, ISO date) → fills blank date under “From iWork Space”\n\nConstants (not returned in JSON)\n\nService Provider fixed text in the document:\niWork Space, Met Ghamr, Contact: karim@test.com\nSignature block: Name: Karim Nabil, Title: Head of Automation\n\nWhen rendering signatures, display “For [COMPANY_LEGAL_NAME]” using client_legal_name.\n\nReturn format\nReturn only a JSON object matching this shape:"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        3680,
+        5456
+      ],
+      "id": "72f612bf-b16b-486b-bc6e-c24f2db73145",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5cdb9e02-3699-4c97-a986-9280ca5dc6bf",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2576,
+        5664
+      ],
+      "id": "ea912ba3-ba96-42d3-a94c-fb4b2bb18260",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=ERROR: This email doesn't exist: {{ $('On form submission2').item.json['Client Email'] }}\n\nYou have just filled the form with this email. Recheck!\n\nhttps://turtle-live-bat.ngrok-free.app/form/7e72980a-0e9c-4041-8623-ae8cf4463512",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2864,
+        5888
+      ],
+      "id": "eadcf76d-ea8e-42ec-89b7-618d84f6a284",
+      "name": "Send a text message6",
+      "webhookId": "a61ebcad-2e61-4cbf-9dfe-d7bda632dc4f",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Proposal Accepted"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        3264,
+        5456
+      ],
+      "id": "0ae2c90f-bbd3-4be6-9e41-78ceb736c157",
+      "name": "Update a database page2"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_5>",
+          "mode": "list",
+          "cachedResultName": "Contract Template",
+          "cachedResultUrl": "https://docs.google.com/document/d/<GOOGLE_RESOURCE_ID_5>/edit?usp=drivesdk"
+        },
+        "name": "={{ $('Update a database page2').item.json.name }} - Contract",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4192,
+        5456
+      ],
+      "id": "e43467aa-59cf-4201-bce7-51ee80b1ddc5",
+      "name": "Copy file1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "formTitle": "Contract Form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Agent Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company Name"
+            },
+            {
+              "fieldLabel": "Services Chosen",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "AI Agents"
+                  },
+                  {
+                    "option": "AI Automation"
+                  },
+                  {
+                    "option": "System Engineering"
+                  }
+                ]
+              },
+              "multiselect": true
+            },
+            {
+              "fieldLabel": "Price"
+            },
+            {
+              "fieldLabel": "Notes"
+            },
+            {
+              "fieldLabel": "Client Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Starting Date",
+              "fieldType": "date"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        2096,
+        5664
+      ],
+      "id": "2c74d97a-55c6-49c7-8671-1a4a9c03e3a9",
+      "name": "On form submission2",
+      "webhookId": "6f87aa86-eb69-44ef-95ee-13c8822a96c7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e6194113-c2ab-495b-bb99-7206e01eab89",
+              "leftValue": "={{ $json.property_status }}",
+              "rightValue": "=Proposal Sent",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "eaac4d6c-173c-43fe-a6a4-d4daa541fb4e",
+              "leftValue": "={{ $json.property_status }}",
+              "rightValue": "Proposal Accepted",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2912,
+        5648
+      ],
+      "id": "d0f8c0b7-e1b5-4527-8be1-de3253661f2e",
+      "name": "If6"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=ERROR: This email is not in the correct stage to create a contract: {{ $('On form submission2').item.json['Client Email'] }}\n\nYou have just filled the \"Contract Creator\" form with this email. Recheck!\n\nhttps://turtle-live-bat.ngrok-free.app/form/7e72980a-0e9c-4041-8623-ae8cf4463512",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3248,
+        5824
+      ],
+      "id": "5fcf816d-434f-491a-ac25-b2946be184f5",
+      "name": "Send a text message7",
+      "webhookId": "015d8750-4fab-4316-b215-e9acb029a855",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        3680,
+        5616
+      ],
+      "id": "73821f5e-4c77-443e-80cf-d1ddf158b336",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "27e3y8drNx1o0RQz",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "[CLIENT_LEGAL_NAME]",
+              "replaceText": "={{ $('Basic LLM Chain1').item.json.client_legal_name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[PROJECT_NAME]",
+              "replaceText": "={{ $('Basic LLM Chain1').item.json.project_name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[CLIENT_CONTACT_EMAIL]",
+              "replaceText": "={{ $('Basic LLM Chain1').item.json.client_contact_email }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[EFFECTIVE_DATE]",
+              "replaceText": "={{ $('Basic LLM Chain1').item.json.effective_date }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[PROJECT_SUMMARY_ONE_PARAGRAPH]",
+              "replaceText": "={{ $('Basic LLM Chain1').item.json.project_summary_one_paragraph }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[List of services]",
+              "replaceText": "={{ \n  (() => {\n    const d = $('Basic LLM Chain1').item.json;\n    const raw = Array.isArray(d.services) ? d.services : [];\n    const normalized = raw.map(s => {\n      if (!s) return '';\n      if (typeof s === 'string') return s.trim();\n      if (typeof s === 'object') {\n        const name = String(s.name || s.title || s.service || '').trim();\n        const desc = String(s.description || s.desc || '').trim();\n        return desc ? `${name} — ${desc}` : name;\n      }\n      return String(s).trim();\n    }).filter(Boolean);\n    return normalized.length ? normalized.map(s => `- ${s}`).join('\\n') : '';\n  })()\n}}\n"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Pricing]",
+              "replaceText": "={{ \n  (() => {\n    const d = $('Basic LLM Chain1').item.json;\n    const items = Array.isArray(d.pricing_items) ? d.pricing_items : [];\n    const cur = d.currency || 'EGP';\n    const fmt = new Intl.NumberFormat('en-EG', { style: 'currency', currency: cur, minimumFractionDigits: 0, maximumFractionDigits: 2 });\n    return items\n      .filter(i => i && i.label)\n      .map(i => `- ${i.label}: ${fmt.format(Number(i.amount) || 0)}`)\n      .join('\\n');\n  })()\n}}\n"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[COMPANY_SIGNATORY_NAME]",
+              "replaceText": "={{ $('Basic LLM Chain1').item.json.client_signatory_name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[COMPANY_SIGNATORY_TITLE]",
+              "replaceText": "={{ $('Basic LLM Chain1').item.json.client_signatory_title }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        4416,
+        5456
+      ],
+      "id": "52da9a02-5504-4c03-a868-0612d74f3947",
+      "name": "Update a document1"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $('Basic LLM Chain1').item.json.client_legal_name }} - Contract - iWork Space",
+        "message": "=Dear {{ $('Basic LLM Chain1').item.json.client_signatory_name }},\n\nWe are ready to move forward with your esteemed company,{{ $('Get many database pages1').item.json.name }}.\nAs discussed, Please find attached our contract.\n\nThanks,\nKarim Nabil\nHead of AI Automation\n",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "Contract"
+              }
+            ]
+          },
+          "sendTo": "={{ $('Basic LLM Chain1').item.json.client_contact_email }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4960,
+        5456
+      ],
+      "id": "27f6b4de-3ac4-4225-9786-51032e0ecb7d",
+      "name": "Create a draft2",
+      "webhookId": "b679c7ae-9b38-4dd0-84c2-ab45a4330735"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.documentId }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "Contract",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          },
+          "fileName": "contract.pdf"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4736,
+        5456
+      ],
+      "id": "f56ec780-b4c1-4916-9cb2-907efd80daf3",
+      "name": "Download file1"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Get many database pages1').item.json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Contract Ready"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        5136,
+        5456
+      ],
+      "id": "e52d6f11-f3be-4c31-aa4f-39df7472b741",
+      "name": "Update a database page3"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=Contract for {{ $json.property_name }} is ready and drafted in your email for {{ $json.property_email }}\n\nCompany: {{ $json.name }}\nContract itself: https://docs.google.com/document/d/{{ $json.id }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5824,
+        5456
+      ],
+      "id": "35cf41e1-4111-4c5b-a56d-983ab30b630f",
+      "name": "Send a text message8",
+      "webhookId": "8a2c9066-ccf8-4472-b13f-4b47aaf13309",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_4>",
+          "mode": "list",
+          "cachedResultName": "Documents Data",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_4>"
+        },
+        "title": "={{ $json.name }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Document Link|url",
+              "urlValue": "=https://docs.google.com/document/d/{{ $('Copy file1').item.json.id }}"
+            },
+            {
+              "key": "Document Type|select",
+              "selectValue": "Contract"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        5328,
+        5456
+      ],
+      "id": "6af4bcce-8937-46ee-a937-62a06fcd8b73",
+      "name": "Create a database page2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53dec2d2-8d38-4174-b757-91eb2a2fbd0d",
+              "name": "telegram_message",
+              "value": "=We have updated the status of {{ $json.email }} to Contract Sent.\n\nPlease fill this on-boarding form:\nhttps://turtle-live-bat.ngrok-free.app/form/7e72980a-0e9c-4041-8623-ae8cf4463512",
+              "type": "string"
+            },
+            {
+              "id": "f24929c4-4afd-4e36-9177-efcdfb203dbf",
+              "name": "new_status",
+              "value": "Contract Sent",
+              "type": "string"
+            },
+            {
+              "id": "1bbf908f-f0ce-45a3-83f3-9c3d1fd8f341",
+              "name": "old_status",
+              "value": "Contract Ready",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3552,
+        5008
+      ],
+      "id": "9d1003a4-e9f5-44eb-838d-4b341c68e168",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "telegram_message"
+            },
+            {
+              "fieldToAggregate": "new_status"
+            },
+            {
+              "fieldToAggregate": "old_status"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3968,
+        4912
+      ],
+      "id": "fd3ac9ab-1fcb-44f6-bc23-03ebd7093138",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        2128,
+        4960
+      ],
+      "id": "30686857-6695-4716-8be5-050ff9e30dd0",
+      "name": "Telegram Trigger1",
+      "webhookId": "1a4c96a2-c5c1-497f-868e-ee6a04738919",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Extract Email from the message. And determine if the message is related to a proposal or a contract\n\n## OUTPUT\n{\n\"email\": \"\",\n\"type\": \"Prposal or Contract or General\"\n}\n\n## RULES\n- If there is no email in the message, leave the output empty.\n- If you don't find a \"proposal\" or \"contract\" in the message, set the value of type to General"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        2384,
+        4960
+      ],
+      "id": "c82370ef-b669-4dd8-b535-6da370c4bb9c",
+      "name": "Basic LLM Chain6"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwq-32b:free",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        2384,
+        5120
+      ],
+      "id": "50149e44-6727-4186-a0ae-ee454f7aa5c8",
+      "name": "OpenRouter Chat Model7",
+      "credentials": {
+        "openRouterApi": {
+          "id": "27e3y8drNx1o0RQz",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "={{ $('Aggregate').item.json.new_status[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        5376,
+        4880
+      ],
+      "id": "af2c824a-3665-461f-af96-dc12ee31b753",
+      "name": "Update a database page10"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "Test Database",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_2>"
+        },
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Email|email",
+              "condition": "equals",
+              "emailValue": "={{ $('If8').item.json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        4240,
+        4912
+      ],
+      "id": "750b95f4-b2e1-45f5-8998-aec3f07221d7",
+      "name": "Get many database pages5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5cdb9e02-3699-4c97-a986-9280ca5dc6bf",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5072,
+        4896
+      ],
+      "id": "289836e7-2211-4b37-b00e-b0f2cbb8e0b3",
+      "name": "If7"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=ERROR: This email doesn't exist: {{ $('Basic LLM Chain6').item.json.email }}\nRecheck!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5440,
+        5168
+      ],
+      "id": "4fbad384-6f9a-4070-8c83-c6e5ccd5ad0e",
+      "name": "Send a text message9",
+      "webhookId": "46e115c8-6fdd-4a75-95b0-6d55ab95933d",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "={{ $('Aggregate').item.json.telegram_message[0] }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5616,
+        4880
+      ],
+      "id": "4c5b7a17-7442-4202-918a-7eae9dd6d185",
+      "name": "Send a text message10",
+      "webhookId": "ad37fb3a-723a-48dd-9f86-b59d9a3e5056",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "Proposal",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "74faecab-8e83-457f-a1e5-945a48e8bcc0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Proposal"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4b53ee87-4e90-4c43-8ecd-5e192d53d6b7",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "Contract",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Contract"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b485fa2b-0c5c-429e-8e8e-ac63d3b202d7",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "General",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "General"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3008,
+        4928
+      ],
+      "id": "3c51384c-d6ea-4679-bd5c-1435a708f1e0",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "554ea9cb-1024-4165-950d-f52b0a66ca76",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2752,
+        4960
+      ],
+      "id": "55f8c7f9-118d-490d-9c82-847c8419e5e3",
+      "name": "If8"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=ERROR: Please provide the client's email.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3008,
+        5200
+      ],
+      "id": "359409f8-8261-4a8d-ba32-b69ef8e250e0",
+      "name": "Send a text message11",
+      "webhookId": "93c28992-a437-4e1e-9226-7fca73982396",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=Provide details \n1 - Contract or Proposal \n2- Email",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3536,
+        5200
+      ],
+      "id": "a15d5204-649f-4881-8b08-206c30ac1d1a",
+      "name": "Send a text message12",
+      "webhookId": "428c6360-a161-442b-9072-12c08e00182c",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53dec2d2-8d38-4174-b757-91eb2a2fbd0d",
+              "name": "telegram_message",
+              "value": "=We have updated the status of {{ $('If8').item.json.email }} to Proposal Sent\n\nOnce he accepts the proposal, fill this \"Contract Creator\" form: https://turtle-live-bat.ngrok-free.app/form/7e72980a-0e9c-4041-8623-ae8cf4463512",
+              "type": "string"
+            },
+            {
+              "id": "f24929c4-4afd-4e36-9177-efcdfb203dbf",
+              "name": "new_status",
+              "value": "Proposal Sent",
+              "type": "string"
+            },
+            {
+              "id": "36337144-7e64-48c3-a7f6-18676839afc9",
+              "name": "old_status",
+              "value": "Proposal Ready",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3552,
+        4816
+      ],
+      "id": "51abaeb0-984d-4539-8ce3-a1b82ea1bb78",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6cb54c30-0539-46c3-ba46-5f8d3e4d37c1",
+              "leftValue": "={{ $json.property_status }}",
+              "rightValue": "={{ $('Aggregate').item.json.old_status[0] }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4464,
+        4912
+      ],
+      "id": "88ca96e9-7f47-41c2-85e4-ee1e73510dad",
+      "name": "If9"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=ERROR: This client: {{ $('Basic LLM Chain6').item.json.email }} is in a different stage.\nRecheck!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4816,
+        5200
+      ],
+      "id": "f1758ba0-dab9-4893-9c31-6849f3ff0cd8",
+      "name": "Send a text message13",
+      "webhookId": "b185fc6a-c559-4b6a-9154-319c429839a1",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Get many database pages3').item.json.name }} Onboarding",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3536,
+        6208
+      ],
+      "id": "b9f7e1c2-919a-42fe-9fa4-1cd081e95e79",
+      "name": "Create folder"
+    },
+    {
+      "parameters": {
+        "formTitle": "On-boarding Form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Sales Agent Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company Name"
+            },
+            {
+              "fieldLabel": "Account Manager Name"
+            },
+            {
+              "fieldLabel": "Account Manager Email"
+            },
+            {
+              "fieldLabel": "Notes"
+            },
+            {
+              "fieldLabel": "Client Email",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        2048,
+        6448
+      ],
+      "id": "971a6fa7-b0e8-4517-92ea-2073a34e7e53",
+      "name": "On form submission3",
+      "webhookId": "c1acd42f-904e-470f-b0e5-e2009032289c"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_2>",
+          "mode": "list",
+          "cachedResultName": "Test Database",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_2>"
+        },
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Email|email",
+              "condition": "equals",
+              "emailValue": "={{ $json['Client Email'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        2304,
+        6448
+      ],
+      "id": "72d6a9ce-f4c7-4c5f-95a4-efa68c4b252b",
+      "name": "Get many database pages3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5cdb9e02-3699-4c97-a986-9280ca5dc6bf",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2576,
+        6448
+      ],
+      "id": "1df82527-4de9-4555-b59e-c579eb9d1f8d",
+      "name": "If5"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=ERROR: This email doesn't exist:  {{ $('On form submission3').item.json['Client Email'] }}\nYou have just filled the \"On-boarding\" form with this email. Recheck!\n\nForm: https://turtle-live-bat.ngrok-free.app/form/7e72980a-0e9c-4041-8623-ae8cf4463512",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2960,
+        6720
+      ],
+      "id": "81d02a43-7d3f-45bb-a29f-fc8a31c081b1",
+      "name": "Send a text message4",
+      "webhookId": "37ff8e20-a52d-4bdb-a6a9-17698d4ea52a",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "<GOOGLE_RESOURCE_ID_6>",
+          "mode": "list",
+          "cachedResultName": "On-boarding Template",
+          "cachedResultUrl": "https://docs.google.com/document/d/<GOOGLE_RESOURCE_ID_6>/edit?usp=drivesdk"
+        },
+        "name": "={{ $('On form submission3').item.json['Company Name'] }} - On-boarding",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        3792,
+        6208
+      ],
+      "id": "dadf9de9-35f4-4af4-b3af-93f65207ff18",
+      "name": "Copy file2",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Onbording - {{ $('Get many database pages3').item.json.name }}",
+        "message": "=Dear {{ $('On form submission3').item.json['Account Manager Name'] }},\n\nOnboarding new client, find attached details.\n\nThanks,\nKarim Nabil\nHead of AI Automation\n",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "data"
+              }
+            ]
+          },
+          "sendTo": "={{ $('On form submission3').item.json['Account Manager Email'] }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4480,
+        6208
+      ],
+      "id": "066d49f5-9529-48ad-a12f-f7f22c2bd98b",
+      "name": "Create a draft3",
+      "webhookId": "d7bbbee0-3d93-4789-857a-cee05e3cd519"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Get many database pages3').item.json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Status|select",
+              "selectValue": "Contract Ready"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        4752,
+        6208
+      ],
+      "id": "48a3f6bf-580e-41f9-a6a2-98b44f66e532",
+      "name": "Update a database page8"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=Contract for {{ $json.property_name }} is ready and drafted in your email for {{ $json.property_email }}\n\nCompany: {{ $json.name }}\nContract itself: https://docs.google.com/document/d/{{ $json.id }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5280,
+        6208
+      ],
+      "id": "510395e2-511e-4c6f-9239-cfc9c0305951",
+      "name": "Send a text message14",
+      "webhookId": "b0c3c168-b55a-4971-89fc-35c527faaee6",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e6194113-c2ab-495b-bb99-7206e01eab89",
+              "leftValue": "={{ $json.property_status }}",
+              "rightValue": "=Contract Sent",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "37332338-d5ad-4114-add9-f9e6c168e984",
+              "leftValue": "={{ $json.property_status }}",
+              "rightValue": "Contract Signed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2928,
+        6432
+      ],
+      "id": "98172e03-70ed-41f5-bef1-3a92806a3190",
+      "name": "If10"
+    },
+    {
+      "parameters": {
+        "chatId": "<YOUR_TELEGRAM_CHAT_ID>",
+        "text": "=ERROR: This email is in a wrong stage:  {{ $('On form submission3').item.json['Client Email'] }}\n\nYou have just filled the \"On-boarding\" form with this email. Recheck!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3584,
+        6704
+      ],
+      "id": "4e74e59d-22f0-443f-8cc8-d29f56b0d781",
+      "name": "Send a text message15",
+      "webhookId": "72afbf46-6855-4d36-93de-d3360189d5cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "pCs2ouFK12mll2Ph",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "<NOTION_PAGE_ID_3>",
+          "mode": "list",
+          "cachedResultName": "Team Tasks",
+          "cachedResultUrl": "https://www.notion.so/<NOTION_PAGE_ID_3>"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        5024,
+        6208
+      ],
+      "id": "3451d6d1-ce81-4f8a-adb6-dfda399a3f1b",
+      "name": "Create a database page3"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "[COMPANY_NAME]",
+              "replaceText": "={{ $('Get many database pages3').item.json.name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[CLIENT_NAME]",
+              "replaceText": "={{ $('Get many database pages3').item.json.property_name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[ACCOUNT_MANAGER]",
+              "replaceText": "={{ $('On form submission3').item.json['Account Manager Name'] }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[CLIENT_FOLDER_LINK]",
+              "replaceText": "=https://drive.google.com/drive/u/1/folders/{{ $('Create folder').item.json.id }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[CLIENT_EMAIL]",
+              "replaceText": "={{ $('Get many database pages3').item.json.property_email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        4000,
+        6208
+      ],
+      "id": "82b6b97b-2575-4e4a-a3b2-1734192a09b3",
+      "name": "Update a document2"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.documentId }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        4208,
+        6208
+      ],
+      "id": "90f154e3-20b3-4c48-96b3-5a1c6a782d33",
+      "name": "Download file2"
+    }
+  ],
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Agent Name": "Alex Morgan",
+          "Lead Interested?": "Yes",
+          "Company Name": "iWork",
+          "Lead Name": "Sam Rivera",
+          "Main Services to Offer": [
+            "AI Agents",
+            "AI Automation"
+          ],
+          "Prices to offer": "50 EGP/month for 6 months",
+          "Notes": "He wasw interested in automating sales processes to increase productivity",
+          "Lead Email": "client@example.com",
+          "submittedAt": "2025-08-26T21:43:56.305-04:00",
+          "formMode": "test"
+        }
+      }
+    ],
+    "Get many database pages2": [
+      {
+        "json": {
+          "id": "<NOTION_PAGE_ID_5>",
+          "name": "ABC",
+          "url": "https://www.notion.so/ABC-<NOTION_PAGE_ID_5>",
+          "property_email": "client@example.com",
+          "property_name": "Jordan Lee",
+          "property_last_communication": {
+            "start": "2025-08-12T02:17:00.000+02:00",
+            "end": null,
+            "time_zone": null
+          },
+          "property_next_communication": true,
+          "property_title": "Business Development Manager",
+          "property_status": "Drop",
+          "property_company": "ABC"
+        }
+      }
+    ],
+    "Switch3": [
+      {
+        "json": {
+          "id": "<NOTION_PAGE_ID_5>",
+          "name": "ABC",
+          "url": "https://www.notion.so/ABC-<NOTION_PAGE_ID_5>",
+          "property_email": "client@example.com",
+          "property_name": "Jordan Lee",
+          "property_last_communication": {
+            "start": "2025-08-12T02:17:00.000+02:00",
+            "end": null,
+            "time_zone": null
+          },
+          "property_next_communication": true,
+          "property_title": "Business Development Manager",
+          "property_status": "Drop",
+          "property_company": "ABC"
+        }
+      }
+    ],
+    "If4": [
+      {
+        "json": {
+          "id": "<NOTION_PAGE_ID_5>",
+          "name": "ABC",
+          "url": "https://www.notion.so/ABC-<NOTION_PAGE_ID_5>",
+          "property_email": "client@example.com",
+          "property_name": "Jordan Lee",
+          "property_last_communication": {
+            "start": "2025-08-12T02:17:00.000+02:00",
+            "end": null,
+            "time_zone": null
+          },
+          "property_next_communication": true,
+          "property_title": "Business Development Manager",
+          "property_status": "Drop",
+          "property_company": "ABC"
+        }
+      }
+    ],
+    "On form submission2": [
+      {
+        "json": {
+          "Agent Name": "Alex",
+          "Company Name": "Automation with Alex",
+          "Services Chosen": [
+            "AI Agents",
+            "AI Automation"
+          ],
+          "Price": "1000 EGP for AI Agents per month and 500 EGP for one time for AI Automation",
+          "Notes": "He is intereseted in e commerce",
+          "Client Email": "client@example.com",
+          "Starting Date": "2025-09-15",
+          "submittedAt": "2025-09-01T07:57:36.613-04:00",
+          "formMode": "test"
+        }
+      }
+    ],
+    "On form submission3": [
+      {
+        "json": {
+          "Sales Agent Name": "Alex",
+          "Company Name": "ABC",
+          "Account Manager Name": "Taylor Kim",
+          "Account Manager Email": "manager@example.com",
+          "Notes": "",
+          "Client Email": "client@example.com",
+          "submittedAt": "2025-09-01T15:25:46.198-04:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Only Websites & Emails1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain4": {
+      "main": [
+        [
+          {
+            "node": "Add Row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Row1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain5": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission1": {
+      "main": [
+        [
+          {
+            "node": "Clear sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Only Websites & Emails1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear sheet2": {
+      "main": [
+        [
+          {
+            "node": "Clear sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear sheet3": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "web_search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create a database page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion Trigger": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a database page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft": {
+      "main": [
+        [
+          {
+            "node": "Update a database page1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Get many database pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Update a database page4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a database page5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page4": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Create a database page1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy file": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Create a draft1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get many database pages2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages2": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch3": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a database page6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Switch3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain2": {
+      "main": [
+        [
+          {
+            "node": "Copy file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft1": {
+      "main": [
+        [
+          {
+            "node": "Update a database page7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page7": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many database pages4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages4": {
+      "main": [
+        [
+          {
+            "node": "Update a database page9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page9": {
+      "main": [
+        [
+          {
+            "node": "Send a text message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Copy file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "If6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page2": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy file1": {
+      "main": [
+        [
+          {
+            "node": "Update a document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission2": {
+      "main": [
+        [
+          {
+            "node": "Get many database pages1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If6": {
+      "main": [
+        [
+          {
+            "node": "Update a database page2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document1": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft2": {
+      "main": [
+        [
+          {
+            "node": "Update a database page3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Create a draft2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page3": {
+      "main": [
+        [
+          {
+            "node": "Create a database page2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Get many database pages5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain6": {
+      "main": [
+        [
+          {
+            "node": "If8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain6",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page10": {
+      "main": [
+        [
+          {
+            "node": "Send a text message10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages5": {
+      "main": [
+        [
+          {
+            "node": "If9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If7": {
+      "main": [
+        [
+          {
+            "node": "Update a database page10",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If8": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If9": {
+      "main": [
+        [
+          {
+            "node": "If7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Copy file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission3": {
+      "main": [
+        [
+          {
+            "node": "Get many database pages3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages3": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "If10",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy file2": {
+      "main": [
+        [
+          {
+            "node": "Update a document2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft3": {
+      "main": [
+        [
+          {
+            "node": "Update a database page8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a database page8": {
+      "main": [
+        [
+          {
+            "node": "Create a database page3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If10": {
+      "main": [
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document2": {
+      "main": [
+        [
+          {
+            "node": "Download file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file2": {
+      "main": [
+        [
+          {
+            "node": "Create a draft3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2e1b82d4-7c11-45ce-8595-a35efcabb81e",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "n48KEOfpRQTenznv",
+  "tags": [
+    {
+      "updatedAt": "2026-08-31T13:26:57.837Z",
+      "createdAt": "2026-08-31T13:26:57.837Z",
+      "id": "9e3EnO2QNlBNErxF",
+      "name": "sales automation"
+    }
+  ]
+}

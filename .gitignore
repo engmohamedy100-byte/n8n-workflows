@@ -1,0 +1,15 @@
+# Original, unsanitized workflow exports.
+# These contain live API keys and personal data. Publishable copies live in
+# workflows/, produced by sanitize.js.
+/*.json
+
+# The sanitizer itself embeds the literal secret values it searches for,
+# so it stays local. scan_secrets.js and analyze.js contain no secrets and
+# are published.
+/sanitize.js
+
+# Local scratch
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
