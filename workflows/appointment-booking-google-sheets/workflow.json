@@ -1,0 +1,3030 @@
+{
+  "name": "Appointment Booking - Google Sheets (book / change / cancel)",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Appointments",
+        "formDescription": "Book a new appointment, or change or cancel one you already have. Enter your email and choose what you need.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "name@email.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "What would you like to do?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Book a new appointment"
+                  },
+                  {
+                    "option": "Change my appointment"
+                  },
+                  {
+                    "option": "Cancel my appointment"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Continue",
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #2563eb;\n\t--color-submit-btn-bg: #2563eb;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #2563eb;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #dbe7ff 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #2563eb !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #1d4ed8 !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "e1992946-9d89-40d4-966d-3aa2f60b3cfa",
+      "name": "Start Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "d5bc5d92-6f2e-457e-8215-aa911f210649"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1b5a7112-e656-4825-a215-04d1049df0af",
+              "name": "businessName",
+              "value": "YOUR BUSINESS NAME",
+              "type": "string"
+            },
+            {
+              "id": "f12ab46f-be66-4bc4-b96f-0b9f7885e4e0",
+              "name": "ownerEmail",
+              "value": "YOUR_EMAIL",
+              "type": "string"
+            },
+            {
+              "id": "db00cb6b-fdb6-47a8-ba75-cbc1608217de",
+              "name": "calendarId",
+              "value": "YOUR_CALENDAR_ID",
+              "type": "string"
+            },
+            {
+              "id": "905dd4e9-23de-40e2-a791-3b8d4ea0ddc4",
+              "name": "formUrl",
+              "value": "YOUR_FORM_URL",
+              "type": "string"
+            },
+            {
+              "id": "da670e78-e154-4ad0-86b1-a6686df12d10",
+              "name": "sheetId",
+              "value": "YOUR_GOOGLE_SHEET_ID",
+              "type": "string"
+            },
+            {
+              "id": "15b959fe-8e69-4ee9-bb71-fb976f1e60e6",
+              "name": "timezone",
+              "value": "Africa/Cairo",
+              "type": "string"
+            },
+            {
+              "id": "f331bb6b-f264-4194-8747-df425e70bce4",
+              "name": "workStart",
+              "value": 10,
+              "type": "number"
+            },
+            {
+              "id": "7bb0ba7b-b89b-4251-bd6d-16012d775bf0",
+              "name": "workEnd",
+              "value": 18,
+              "type": "number"
+            },
+            {
+              "id": "75bcb3b6-a786-4170-86fd-2fc4366cef02",
+              "name": "slotStepMin",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "8d6d42bf-4564-417f-902d-8e9924c4661e",
+              "name": "defaultDurationMin",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "id": "e9f317fe-dcd9-43ae-bde9-4110f43dbf26",
+              "name": "closedWeekdays",
+              "value": "5",
+              "type": "string"
+            },
+            {
+              "id": "6c463229-f1a2-47b4-872c-b115f712a4f7",
+              "name": "maxDaysAhead",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "id": "fef0f9dc-4d01-444c-8d80-6c067995cd71",
+              "name": "minNoticeHours",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "4b1ea87b-5e9f-4227-abab-d5053f59268d",
+              "name": "minChangeHours",
+              "value": 2,
+              "type": "number"
+            },
+            {
+              "id": "63fa7766-f653-4dda-b595-e48b327cd60a",
+              "name": "maxActiveBookings",
+              "value": 3,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "1189b1ec-b107-475d-95fa-7a85aef481f8",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Step 0: read what the client chose on the first form\nconst f = $input.first().json;\nconst email = String(f['Email'] || '').trim().toLowerCase();\nconst choice = String(f['What would you like to do?'] || '').trim();\nconst action = choice.startsWith('Book') ? 'new' : choice.startsWith('Change') ? 'change' : choice.startsWith('Cancel') ? 'cancel' : '';\nlet message = '';\nif (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) message = 'The email address is not valid. Please open the form again and check it.';\nelse if (!action) message = 'Please choose what you would like to do. Open the form again and try once more.';\nreturn [{ json: { email, action, ok: message === '', title: 'Please check your details', message } }];"
+      },
+      "id": "6334510b-d2b3-40c3-9478-28ae2337f146",
+      "name": "Read Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fe9ad3ed-24a6-43e8-b745-c71e16f15ffd",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7143ae43-2bf2-421a-84f3-50b924086365",
+      "name": "Valid Request?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Bookings",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "738d3c24-6b5b-413e-9782-dcac14b0e86d",
+      "name": "Read Bookings",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        960,
+        300
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Reads the whole Bookings sheet, finds this client's upcoming bookings and decides where to go next\nconst cfg = $('Config').first().json;\nconst req = $('Read Request').first().json;\nconst zone = cfg.timezone;\nconst now = DateTime.now().setZone(zone);\nconst minChange = Number(cfg.minChangeHours) || 0;\nconst maxActive = Number(cfg.maxActiveBookings) || 3;\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\nconst pad = n => String(n).padStart(2, '0');\n// The sheet keeps dates and times as text. If someone retypes a cell, Google may turn it into a number: handle both.\nconst dStr = v => {\n  if (typeof v === 'number') return DateTime.fromMillis(Date.UTC(1899, 11, 30) + Math.round(v) * 86400000, { zone: 'utc' }).toFormat('yyyy-MM-dd');\n  const s = String(v == null ? '' : v).trim();\n  const m = s.match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})/);\n  return m ? `${m[1]}-${pad(m[2])}-${pad(m[3])}` : s;\n};\nconst tStr = v => {\n  if (typeof v === 'number') { const mins = Math.round((v % 1) * 1440); return `${pad(Math.floor(mins / 60) % 24)}:${pad(mins % 60)}`; }\n  const s = String(v == null ? '' : v).trim();\n  const m = s.match(/^(\\d{1,2}):(\\d{2})/);\n  return m ? `${pad(m[1])}:${m[2]}` : s;\n};\n\nconst items = $input.all().map(i => i.json);\nconst readError = items.find(r => r && r.error);\nconst hasRows = items.some(r => r && r.row_number !== undefined);\nconst headerBroken = hasRows && !items.some(r => r && r['Booking ID'] !== undefined && r['Email'] !== undefined && r['Status'] !== undefined);\nconst lookupFailed = !!readError || headerBroken;\nconst lookupError = readError ? errText(readError.error) : (headerBroken ? 'The header row of the Bookings sheet was changed.' : '');\nconst rows = items.filter(r => r && r['Booking ID'] !== undefined && String(r['Booking ID']).trim() !== '');\nconst existingIds = rows.map(r => String(r['Booking ID']).trim());\n\nconst mine = rows.map(r => {\n  const date = dStr(r['Date']);\n  const time = tStr(r['Start Time']);\n  return { r, date, time, start: DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone }) };\n}).filter(x => String(x.r['Email'] || '').trim().toLowerCase() === req.email\n  && String(x.r['Status'] || '').trim().toLowerCase() === 'booked'\n  && x.start.isValid && x.start > now)\n  .sort((a, b) => a.start.toMillis() - b.start.toMillis())\n  .map(x => {\n    const id = String(x.r['Booking ID']).trim();\n    const service = String(x.r['Service'] || '').trim();\n    return {\n      bookingId: id, service,\n      name: String(x.r['Client Name'] || '').trim(), phone: String(x.r['Phone'] || '').trim(),\n      notes: String(x.r['Notes'] || '').trim(), eventId: String(x.r['Calendar Event ID'] || '').trim(),\n      durationMin: Number(x.r['Duration (min)']) || 0, changedCount: Number(x.r['Changed Count']) || 0,\n      date: x.date, time: x.time, startISO: x.start.toISO(),\n      whenText: x.start.toFormat(\"cccc, d LLLL yyyy 'at' HH:mm\"),\n      hoursAway: x.start.diff(now, 'hours').hours,\n      label: `${id} | ${service} | ${x.start.toFormat(\"ccc, d LLL yyyy 'at' HH:mm\")}`\n    };\n  });\nconst changeable = mine.filter(b => b.hoursAway >= minChange);\n\nlet route = req.action;\nlet title = '';\nlet message = '';\nif (lookupFailed && req.action !== 'new') {\n  route = 'error';\n  title = 'Technical problem';\n  message = 'We could not read our bookings right now. Nothing was changed. Please try again in a few minutes or contact us directly.';\n} else if (!lookupFailed) {\n  if (req.action === 'new' && mine.length >= maxActive) {\n    route = 'blocked'; title = 'Booking limit reached';\n    message = `You already have ${mine.length} upcoming bookings, which is the maximum. Please change or cancel one first.`;\n  } else if (req.action !== 'new' && mine.length === 0) {\n    route = 'blocked'; title = 'No booking found';\n    message = `We could not find an upcoming booking for ${req.email}. Please check the email address you used when you booked, or choose \"Book a new appointment\".`;\n  } else if (req.action !== 'new' && changeable.length === 0) {\n    route = 'blocked'; title = 'Please contact us';\n    message = `Your next booking (${mine[0].whenText}) starts in less than ${minChange} hours, so it cannot be changed or canceled online. Please contact us directly and we will help you.`;\n  }\n}\nreturn [{ json: { ...req, route, title, message, lookupFailed, lookupError, activeCount: mine.length, bookings: mine, changeable, existingIds } }];"
+      },
+      "id": "6eae0054-ddb0-46c7-8f85-7659fb5b86ae",
+      "name": "Process Bookings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "84b8e838-5be2-4d71-a363-3849a2bfded1",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "new",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "New"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0cbe58a4-ea09-49b7-a7f6-fecd0c18f349",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "change",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Change"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d1b1fc33-d2d9-4f4c-ae2e-c134dbef4938",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cancel"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "15efab4a-5a7f-4a66-9743-af2b76228b46",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "blocked",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Blocked"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Error"
+        }
+      },
+      "id": "1d2a49a9-e994-4966-add9-a00798ae72ce",
+      "name": "Route",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "={{ $json.title || 'Please note' }}",
+        "completionMessage": "={{ $json.message || 'We could not continue. Please open the form again.' }}",
+        "options": {
+          "appendAttribution": false,
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #d97706;\n\t--color-submit-btn-bg: #d97706;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #d97706;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #fef3c7 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #d97706 !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #b45309 !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "3ac1100a-1bf4-47ae-ba79-7ca81a9ce4ed",
+      "name": "Done - Info",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        1400
+      ],
+      "webhookId": "0c9c0e97-7611-4947-a6f5-c73b6990181e"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "={{ $json.title || 'Technical problem' }}",
+        "completionMessage": "={{ $json.message || 'Sorry, a technical problem stopped us. Please try again in a few minutes.' }}",
+        "options": {
+          "appendAttribution": false,
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #dc2626;\n\t--color-submit-btn-bg: #dc2626;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #dc2626;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #fee2e2 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #dc2626 !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #b91c1c !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "f38d60ff-b257-48bb-b765-54b858151515",
+      "name": "Done - Error",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        1600
+      ],
+      "webhookId": "69b5638d-f70d-4392-8a67-94c60cf89adb"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Services",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "7dfbbaf6-caf6-4780-b021-1e124fdd4e07",
+      "name": "Read Services",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1700,
+        100
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Builds the step-1 form from the Services sheet (new booking or change booking)\nconst cfg = $('Config').first().json;\nconst pb = $('Process Bookings').first().json;\nconst mode = pb.action;\nconst items = $input.all().map(i => i.json);\nconst readError = items.find(r => r && r.error);\nconst off = v => ['no', 'n', 'false', '0', 'inactive'].includes(String(v == null ? '' : v).trim().toLowerCase());\nconst seen = new Set();\nconst services = [];\nfor (const r of items) {\n  if (!r || r['Service Name'] === undefined) continue;\n  const name = String(r['Service Name']).trim();\n  if (!name || seen.has(name) || off(r['Active'])) continue;\n  seen.add(name);\n  services.push({ name, duration: Math.round(Number(r['Duration (min)'])) || Number(cfg.defaultDurationMin) || 60 });\n}\nconst keepText = mode === 'change' ? ' Your current booking was not changed.' : '';\nlet title = 'Technical problem';\nlet message = '';\nif (readError) message = 'We could not read our services list right now. Please try again in a few minutes.' + keepText;\nelse if (!services.length) { title = 'No services available'; message = 'There are no services open for booking at the moment. Please contact us directly.' + keepText; }\n\nconst KEEP = 'Keep my current service';\nconst svcOptions = services.map(s => ({ option: s.name }));\nlet fields;\nif (mode === 'change') {\n  fields = [\n    { fieldLabel: 'Which booking do you want to change?', fieldType: 'dropdown', requiredField: true, fieldOptions: { values: (pb.changeable || []).map(b => ({ option: b.label })) } },\n    { fieldLabel: 'Service', fieldType: 'dropdown', requiredField: true, fieldOptions: { values: [{ option: KEEP }, ...svcOptions] } },\n    { fieldLabel: 'New date', fieldType: 'date', requiredField: true }\n  ];\n} else {\n  fields = [\n    { fieldLabel: 'Service', fieldType: 'dropdown', requiredField: true, fieldOptions: { values: svcOptions } },\n    { fieldLabel: 'Preferred date', fieldType: 'date', requiredField: true }\n  ];\n}\nreturn [{ json: {\n  ok: message === '', title, message, mode, services,\n  formTitle: mode === 'change' ? 'Change Your Appointment' : 'Book Your Appointment',\n  formDescription: mode === 'change'\n    ? 'Step 1 of 2 · Choose the booking, the service and the new date. Next, you will see the free times.'\n    : 'Step 1 of 2 · Choose your service and preferred date. Next, you will see the free times.',\n  formJson: JSON.stringify(fields)\n} }];"
+      },
+      "id": "dbc7823f-d72c-410d-b195-583c22601963",
+      "name": "Build Service Form",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1940,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f6bfc613-8e1d-4925-9428-48eb6d468d7f",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "abb69d7c-08c3-437b-8bc2-670559340a28",
+      "name": "Services OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2180,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "defineForm": "json",
+        "jsonOutput": "={{ $('Build Service Form').first().json.formJson }}",
+        "options": {
+          "formTitle": "={{ $('Build Service Form').first().json.formTitle }}",
+          "formDescription": "={{ $('Build Service Form').first().json.formDescription }}",
+          "buttonLabel": "See Free Times",
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #2563eb;\n\t--color-submit-btn-bg: #2563eb;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #2563eb;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #dbe7ff 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #2563eb !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #1d4ed8 !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "49523121-de03-4afa-8c7d-d1510eecadfc",
+      "name": "Booking Details",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        2420,
+        100
+      ],
+      "webhookId": "7291e331-da12-44e1-b167-f180ccf72894"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Checks the choices of step 1 and prepares the day window for the calendar\nconst cfg = $('Config').first().json;\nconst pb = $('Process Bookings').first().json;\nconst sf = $('Build Service Form').first().json;\nconst f = $input.first().json;\nconst zone = cfg.timezone;\nconst mode = pb.action;\nconst KEEP = 'Keep my current service';\nconst now = DateTime.now().setZone(zone);\nconst date = String(f[mode === 'change' ? 'New date' : 'Preferred date'] || '').trim();\nconst day = DateTime.fromISO(date, { zone });\nconst closed = String(cfg.closedWeekdays == null ? '' : cfg.closedWeekdays).split(',').map(x => parseInt(x, 10)).filter(x => x >= 1 && x <= 7);\nconst maxDays = Number(cfg.maxDaysAhead) || 60;\n\nlet booking = null;\nlet problem = '';\nif (mode === 'change') {\n  const id = String(f['Which booking do you want to change?'] || '').split(' | ')[0].trim();\n  booking = (pb.changeable || []).find(b => b.bookingId === id) || null;\n  if (!booking) problem = 'We could not find the booking you selected.';\n  else if (DateTime.fromISO(booking.startISO).diff(now, 'hours').hours < (Number(cfg.minChangeHours) || 0)) problem = 'This booking starts very soon, so it cannot be changed online. Please contact us directly.';\n}\nconst choice = String(f['Service'] || '').trim();\nconst keepService = mode === 'change' && choice === KEEP && !!booking;\nconst serviceName = keepService ? booking.service : choice;\nconst found = (sf.services || []).find(s => s.name === serviceName);\nif (!problem && !found && !keepService) problem = 'This service is not available any more.';\nif (!problem) {\n  if (!date || !day.isValid) problem = 'The date is not valid.';\n  else if (day.endOf('day') < now) problem = 'This date is in the past.';\n  else if (day.startOf('day') > now.plus({ days: maxDays })) problem = `We only take bookings up to ${maxDays} days ahead.`;\n  else if (closed.includes(day.weekday)) problem = 'We are closed on this day.';\n}\nconst durationMin = found ? found.duration : ((booking && booking.durationMin) || Number(cfg.defaultDurationMin) || 60);\nconst start = day.isValid ? day.startOf('day') : now.startOf('day');\nconst keepText = mode === 'change' ? ' Your current booking was not changed.' : '';\nreturn [{ json: {\n  ok: problem === '', title: 'Please check your choice',\n  message: problem ? `${problem}${keepText} Please open the form again and try once more.` : '',\n  mode, email: pb.email, date, serviceName, durationMin, booking,\n  timeMin: start.toISO(), timeMax: start.plus({ days: 1 }).toISO()\n} }];"
+      },
+      "id": "47bbf1fc-7fda-445c-9ee0-ec32258a0276",
+      "name": "Day Window",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2660,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "04b0eb23-566f-41cb-a5bc-2ec2ef0e731f",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a440621b-c541-4851-9299-6ca677ba6fe6",
+      "name": "Day OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2900,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.calendarId }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $('Day Window').first().json.timeMin }}",
+        "timeMax": "={{ $('Day Window').first().json.timeMax }}",
+        "options": {
+          "outputFormat": "bookedSlots",
+          "timezone": "Africa/Cairo"
+        }
+      },
+      "id": "0e84d97a-3d78-4aed-bd75-f5393774b9dc",
+      "name": "Get Busy Times",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        3140,
+        100
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "jDGjtJqOCtHguLkr",
+          "name": "Google Calendar account"
+        }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Finds the free times of the chosen day and builds the step-2 form\nconst cfg = $('Config').first().json;\nconst w = $('Day Window').first().json;\nconst zone = cfg.timezone;\nconst items = $input.all().map(i => i.json);\nconst calendarError = items.some(b => b && b.error);\nconst val = x => (x && typeof x === 'object') ? (x.dateTime || x.date) : x;\nconst busy = items.filter(b => b && b.start && b.end)\n  .map(b => ({ s: DateTime.fromISO(val(b.start)), e: DateTime.fromISO(val(b.end)) }))\n  .filter(b => b.s.isValid && b.e.isValid);\nconst keepText = w.mode === 'change' ? ' Your current booking was not changed.' : '';\nconst dur = Number(w.durationMin) || Number(cfg.defaultDurationMin) || 60;\nconst step = Number(cfg.slotStepMin) || 30;\nconst workStart = Number(cfg.workStart);\nconst workEnd = Number(cfg.workEnd);\n\nlet problem = '';\nif (calendarError) problem = 'We could not read our calendar right now. Please try again in a few minutes.';\nconst free = [];\nif (!problem) {\n  const day = DateTime.fromISO(w.date, { zone });\n  const earliest = DateTime.now().setZone(zone).plus({ hours: Number(cfg.minNoticeHours) || 0 });\n  for (let m = workStart * 60; m + dur <= workEnd * 60; m += step) {\n    const s = day.startOf('day').plus({ minutes: m });\n    const e = s.plus({ minutes: dur });\n    const clash = busy.some(b => s < b.e && e > b.s);\n    if (!clash && s > earliest) free.push(s.toFormat('HH:mm'));\n  }\n}\nconst fields = [{ fieldLabel: 'Available time', fieldType: 'dropdown', requiredField: true, fieldOptions: { values: free.map(t => ({ option: t })) } }];\nif (w.mode === 'new') {   // a returning client that moves a booking is already known\n  fields.push({ fieldLabel: 'Full name', placeholder: 'e.g. Ahmed Hassan', requiredField: true });\n  fields.push({ fieldLabel: 'Phone', placeholder: '+20 1XX XXX XXXX', requiredField: true });\n}\nfields.push({ fieldLabel: 'Notes', fieldType: 'textarea', placeholder: 'Anything we should know? (optional)' });\nconst message = problem\n  ? problem + keepText\n  : (free.length ? '' : 'There are no free times on this day. Please open the form again and choose another date.' + keepText);\nreturn [{ json: {\n  hasFree: free.length > 0, title: problem ? 'Calendar problem' : 'No free time', message,\n  mode: w.mode, date: w.date, durationMin: dur, freeCount: free.length,\n  formTitle: w.mode === 'change' ? 'Choose Your New Time' : 'Choose Your Time',\n  formDescription: `Step 2 of 2 · Free times on ${w.date} · ${dur} min`,\n  buttonLabel: w.mode === 'change' ? 'Confirm New Time' : 'Confirm My Booking',\n  formJson: JSON.stringify(fields)\n} }];"
+      },
+      "id": "b49e6766-b95f-4f66-8d6d-89dc421fbdfd",
+      "name": "Build Free Slots",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3380,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "74d79f46-0df9-4c74-af99-af1c648e404e",
+              "leftValue": "={{ $json.hasFree }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9f439bca-b616-4cb6-aa6d-aac4d4b25716",
+      "name": "Any Free Time?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3620,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "defineForm": "json",
+        "jsonOutput": "={{ $('Build Free Slots').first().json.formJson }}",
+        "options": {
+          "formTitle": "={{ $('Build Free Slots').first().json.formTitle }}",
+          "formDescription": "={{ $('Build Free Slots').first().json.formDescription }}",
+          "buttonLabel": "={{ $('Build Free Slots').first().json.buttonLabel }}",
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #2563eb;\n\t--color-submit-btn-bg: #2563eb;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #2563eb;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #dbe7ff 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #2563eb !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #1d4ed8 !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "930f1dd1-8a71-41cc-9725-52e9b14d7800",
+      "name": "Pick Time",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        3860,
+        100
+      ],
+      "webhookId": "b8dd38a8-fe88-4c91-a807-b62a67fc26c1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collects everything the sheet and the calendar need\nconst cfg = $('Config').first().json;\nconst zone = cfg.timezone;\nconst w = $('Day Window').first().json;\nconst pb = $('Process Bookings').first().json;\nconst f = $input.first().json;\nconst ex = w.mode === 'change' ? w.booking : null;\nconst reschedule = !!ex;\nconst clean = s => String(s || '').trim().replace(/\\s+/g, ' ');\n\nconst email = w.email;\nconst name = reschedule ? (clean(ex.name) || email.split('@')[0]) : clean(f['Full name']);\nconst phone = reschedule ? String(ex.phone || '') : String(f['Phone'] || '').replace(/[^\\d+]/g, '');\nconst time = String(f['Available time'] || '').trim();\nconst notes = String(f['Notes'] || '').trim() || (reschedule ? String(ex.notes || '') : '');\nconst dur = Number(w.durationMin) || Number(cfg.defaultDurationMin) || 60;\n\nconst errors = [];\nif (!reschedule && name.length < 2) errors.push('Please enter your full name.');\nif (!reschedule && phone.replace(/\\D/g, '').length < 7) errors.push('The phone number looks too short.');\nconst now = DateTime.now().setZone(zone);\nconst start = DateTime.fromFormat(`${w.date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nif (!start.isValid) errors.push('The time is not valid.');\nelse if (start < now) errors.push('This time has already passed.');\nconst safeStart = start.isValid ? start : now;   // a dummy value keeps the next calendar check from crashing; \"valid\" stays false\nconst end = safeStart.plus({ minutes: dur });\n\nconst taken = new Set((pb.existingIds || []).map(String));\nlet bookingId = reschedule ? ex.bookingId : '';\nfor (let i = 0; !bookingId && i < 100; i++) {\n  const c = 'BK-' + safeStart.toFormat('yyyyLLdd') + '-' + Math.floor(1000 + Math.random() * 9000);\n  if (!taken.has(c)) bookingId = c;\n}\nif (!bookingId) bookingId = 'BK-' + Date.now();\nconst nowText = now.toFormat('yyyy-LL-dd HH:mm');\nconst parts = name.split(' ');\nreturn [{ json: {\n  BookingID: bookingId, mode: reschedule ? 'change' : 'new',\n  Name: name, FirstName: parts[0] || '', LastName: parts.slice(1).join(' '),\n  Email: email, Phone: phone, Service: w.serviceName,\n  Date: w.date, Time: time, EndTime: end.toFormat('HH:mm'), DurationMin: dur, Notes: notes,\n  Slot: `${w.date} ${time}`, startISO: safeStart.toISO(), endISO: end.toISO(),\n  CreatedAt: nowText, UpdatedAt: nowText,\n  ChangedCount: reschedule ? (ex.changedCount || 0) + 1 : 0,\n  previousWhen: reschedule ? ex.whenText : '',\n  existing: ex, valid: errors.length === 0, errors\n} }];"
+      },
+      "id": "2388021f-7b9f-4c87-8c13-72ff59c23cd9",
+      "name": "Prepare Booking",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.calendarId }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $json.startISO }}",
+        "timeMax": "={{ $json.endISO }}",
+        "options": {
+          "outputFormat": "bookedSlots",
+          "timezone": "Africa/Cairo"
+        }
+      },
+      "id": "953e4377-5058-460b-8143-22331e7bf208",
+      "name": "Re-check Slot",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        4340,
+        100
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "jDGjtJqOCtHguLkr",
+          "name": "Google Calendar account"
+        }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Last safety check: was this time taken while the client was filling the form?\nconst b = $('Prepare Booking').first().json;\nconst items = $input.all().map(i => i.json);\nconst calendarError = items.some(x => x && x.error);\nconst busy = items.filter(x => x && x.start && x.end);\n\nlet Status = 'Confirmed';\nlet Reason = '';\nif (!b.valid) { Status = 'Rejected'; Reason = b.errors.join(' '); }\nelse if (calendarError) { Status = 'Rejected'; Reason = 'We could not check our calendar right now. Please try again in a few minutes.'; }\nelse if (busy.length > 0) { Status = 'Rejected'; Reason = 'Sorry, someone just booked this time. Please choose another time.'; }\nif (Status === 'Rejected' && b.mode === 'change') Reason += ' Your current booking was not changed.';\nreturn [{ json: { ...b, Status, Reason } }];"
+      },
+      "id": "003d72d2-961a-4fd3-896d-27c8af9a98de",
+      "name": "Decide",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4580,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "356e5f1e-d000-4161-bd19-5161f9a096ab",
+              "leftValue": "={{ $('Decide').first().json.Status }}",
+              "rightValue": "Confirmed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fe655df7-3fa8-4d10-8285-a4c7ec583674",
+      "name": "Confirmed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4820,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.calendarId }}",
+          "mode": "id"
+        },
+        "start": "={{ $('Decide').first().json.startISO }}",
+        "end": "={{ $('Decide').first().json.endISO }}",
+        "additionalFields": {
+          "description": "=Booking ID: {{ $('Decide').first().json.BookingID }}\nPhone: {{ $('Decide').first().json.Phone }}\nEmail: {{ $('Decide').first().json.Email }}\nNotes: {{ $('Decide').first().json.Notes }}",
+          "summary": "={{ $('Decide').first().json.Service }} - {{ $('Decide').first().json.Name }}"
+        }
+      },
+      "id": "5a7c6834-fac8-4afd-80c4-a81df29060dd",
+      "name": "Add to Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        5060,
+        0
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "jDGjtJqOCtHguLkr",
+          "name": "Google Calendar account"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1420ac8c-b4e3-4dad-a64c-3ddcba27567b",
+              "leftValue": "={{ $('Decide').first().json.mode }}",
+              "rightValue": "change",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f253042e-b541-47df-a9f4-8b242e942c3b",
+      "name": "Is Change?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5300,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Bookings",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking ID": "={{ $('Decide').first().json.BookingID }}",
+            "Status": "Booked",
+            "Service": "={{ $('Decide').first().json.Service }}",
+            "Date": "={{ $('Decide').first().json.Date }}",
+            "Start Time": "={{ $('Decide').first().json.Time }}",
+            "End Time": "={{ $('Decide').first().json.EndTime }}",
+            "Duration (min)": "={{ $('Decide').first().json.DurationMin }}",
+            "Notes": "={{ $('Decide').first().json.Notes }}",
+            "Calendar Event ID": "={{ $('Add to Calendar').first().json.id || '' }}",
+            "Last Updated": "={{ $('Decide').first().json.UpdatedAt }}",
+            "Changed Count": "={{ $('Decide').first().json.ChangedCount }}",
+            "Previous Time": "={{ $('Decide').first().json.previousWhen }}",
+            "Reminder Sent": ""
+          },
+          "matchingColumns": [
+            "Booking ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking ID",
+              "displayName": "Booking ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start Time",
+              "displayName": "Start Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End Time",
+              "displayName": "End Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duration (min)",
+              "displayName": "Duration (min)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar Event ID",
+              "displayName": "Calendar Event ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Changed Count",
+              "displayName": "Changed Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Previous Time",
+              "displayName": "Previous Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Canceled At",
+              "displayName": "Canceled At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reminder Sent",
+              "displayName": "Reminder Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "VA Notes",
+              "displayName": "VA Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "e86fcb27-cd61-4f24-8194-4790f27742d1",
+      "name": "Update Booking Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        5540,
+        -120
+      ],
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.calendarId }}",
+          "mode": "id"
+        },
+        "eventId": "={{ $('Decide').first().json.existing.eventId || 'missing' }}",
+        "options": {
+          "sendUpdates": "none"
+        }
+      },
+      "id": "a1060193-7423-445d-b59c-9ce56802ba8c",
+      "name": "Delete Old Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        5780,
+        -120
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "jDGjtJqOCtHguLkr",
+          "name": "Google Calendar account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Bookings",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking ID": "={{ $('Decide').first().json.BookingID }}",
+            "Status": "Booked",
+            "Client Name": "={{ $('Decide').first().json.Name }}",
+            "Email": "={{ $('Decide').first().json.Email }}",
+            "Phone": "={{ $('Decide').first().json.Phone }}",
+            "Service": "={{ $('Decide').first().json.Service }}",
+            "Date": "={{ $('Decide').first().json.Date }}",
+            "Start Time": "={{ $('Decide').first().json.Time }}",
+            "End Time": "={{ $('Decide').first().json.EndTime }}",
+            "Duration (min)": "={{ $('Decide').first().json.DurationMin }}",
+            "Notes": "={{ $('Decide').first().json.Notes }}",
+            "Calendar Event ID": "={{ $('Add to Calendar').first().json.id || '' }}",
+            "Created At": "={{ $('Decide').first().json.CreatedAt }}",
+            "Last Updated": "={{ $('Decide').first().json.UpdatedAt }}",
+            "Changed Count": 0,
+            "Previous Time": "",
+            "Canceled At": "",
+            "Reminder Sent": ""
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Booking ID",
+              "displayName": "Booking ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start Time",
+              "displayName": "Start Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End Time",
+              "displayName": "End Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duration (min)",
+              "displayName": "Duration (min)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar Event ID",
+              "displayName": "Calendar Event ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Changed Count",
+              "displayName": "Changed Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Previous Time",
+              "displayName": "Previous Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Canceled At",
+              "displayName": "Canceled At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reminder Sent",
+              "displayName": "Reminder Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "VA Notes",
+              "displayName": "VA Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "7162ea8d-236a-4751-9b6d-b37fae9a8fba",
+      "name": "Save Booking",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        5540,
+        120
+      ],
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Clients",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Decide').first().json.Email }}",
+            "Full Name": "={{ $('Decide').first().json.Name }}",
+            "Phone": "={{ $('Decide').first().json.Phone }}",
+            "Last Booking ID": "={{ $('Decide').first().json.BookingID }}",
+            "Last Service": "={{ $('Decide').first().json.Service }}",
+            "Last Booking": "={{ $('Decide').first().json.Date + ' ' + $('Decide').first().json.Time }}",
+            "Last Updated": "={{ $('Decide').first().json.UpdatedAt }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Booking ID",
+              "displayName": "Last Booking ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Service",
+              "displayName": "Last Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Booking",
+              "displayName": "Last Booking",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Notes",
+              "displayName": "Client Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "49d8c980-8868-4f3e-b643-58d23f254d64",
+      "name": "Save Client",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        5780,
+        120
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst THEMES = { blue: '#2563eb', green: '#16a34a', red: '#dc2626', amber: '#d97706' };\n// rows = [[label, valueHtml], ...]   (valueHtml must already be escaped with esc())\nfunction emailHtml(o) {\n  const c = THEMES[o.theme || 'blue'];\n  const rows = (o.rows || []).filter(r => r && r[1] !== '' && r[1] != null).map(r =>\n    `<tr><td style=\"padding:9px 14px 9px 0;color:#64748b;font-size:13px;white-space:nowrap;vertical-align:top\">${r[0]}</td><td style=\"padding:9px 0;color:#0f172a;font-size:15px;font-weight:600\">${r[1]}</td></tr>`).join('');\n  const box = rows ? `<tr><td style=\"padding:20px 32px 0\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px\"><tr><td style=\"padding:8px 20px\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">${rows}</table></td></tr></table></td></tr>` : '';\n  const btn = o.button ? `<tr><td style=\"padding:24px 32px 0\"><a href=\"${esc(o.button.url)}\" style=\"display:inline-block;background:${c};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:10px\">${esc(o.button.label)}</a></td></tr>` : '';\n  const note = o.note ? `<tr><td style=\"padding:20px 32px 0;font-size:13px;line-height:1.6;color:#64748b\">${o.note}</td></tr>` : '';\n  return `<div style=\"margin:0;padding:24px 12px;background:#eef2f7;font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;margin:0 auto\"><tr><td>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden\">\n<tr><td style=\"background:${c};height:6px;line-height:6px;font-size:0\">&nbsp;</td></tr>\n<tr><td style=\"padding:28px 32px 0\"><div style=\"font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c}\">${esc(o.business)}</div>\n<h1 style=\"margin:10px 0 0;font-size:24px;line-height:1.3;color:#0f172a\">${o.icon || ''} ${esc(o.title)}</h1></td></tr>\n<tr><td style=\"padding:12px 32px 0;font-size:15px;line-height:1.7;color:#334155\">${o.intro || ''}</td></tr>\n${box}${btn}${note}\n<tr><td style=\"padding:28px 32px\"><div style=\"border-top:1px solid #e2e8f0;padding-top:16px;font-size:12px;color:#94a3b8\">${esc(o.business)}</div></td></tr>\n</table></td></tr></table></div>`;\n}\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\nconst zone = $('Config').first().json.timezone;\nconst cfg = $('Config').first().json;\nconst b = $('Decide').first().json;\nconst pb = $('Process Bookings').first().json;\nconst resched = b.mode === 'change';\nconst start = DateTime.fromISO(b.startISO, { zone });\nconst dateText = start.toFormat('cccc, d LLLL yyyy');\n\nconst clientHtml = emailHtml({\n  business: cfg.businessName, theme: resched ? 'blue' : 'green', icon: resched ? '🔄' : '✅',\n  title: resched ? 'Booking updated' : 'Booking confirmed',\n  intro: `Hi ${esc(b.FirstName)},<br>${resched ? 'Your booking has been moved. Here are the new details:' : 'Your booking is confirmed. Here are the details:'}`,\n  rows: [['Booking ID', esc(b.BookingID)], ['Service', esc(b.Service)], ['Date', esc(dateText)], ['Time', esc(b.Time + ' (' + b.DurationMin + ' min)')],\n         resched ? ['Previous time', esc(b.previousWhen)] : null],\n  button: { label: 'Change or cancel my booking', url: cfg.formUrl },\n  note: 'To change or cancel, open the booking form, choose \"Change my appointment\" or \"Cancel my appointment\", and enter the same email address you used for this booking.'\n});\n\n// anything that went wrong AFTER the booking was saved is a warning for the owner, not an error for the client\nconst warns = [];\nif (resched) {\n  if ($('Delete Old Event').isExecuted) {\n    const d = $('Delete Old Event').first().json;\n    if (d && d.error) warns.push('The old calendar event could not be deleted automatically. Please delete it by hand: ' + esc(b.previousWhen));\n  }\n} else if ($('Save Client').isExecuted) {\n  const c = $('Save Client').first().json;\n  if (c && c.error) warns.push('The booking was saved, but the Clients sheet could not be updated: ' + esc(String(errText(c.error)).slice(0, 200)));\n}\nif (pb.lookupFailed) warns.push('The duplicate-booking check was skipped because the Bookings sheet could not be read: ' + esc(String(pb.lookupError || '').slice(0, 200)));\nconst warnBox = warns.length ? `<div style=\"background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:12px 14px\">⚠️ ${warns.join('<br>⚠️ ')}</div>` : '';\nconst ownerHtml = emailHtml({\n  business: cfg.businessName, theme: warns.length ? 'red' : (resched ? 'blue' : 'green'), icon: resched ? '🔄' : '📅',\n  title: resched ? 'Booking moved' : 'New booking',\n  intro: warnBox || (resched ? 'A client moved their booking.' : 'A client booked an appointment.'),\n  rows: [['Booking ID', esc(b.BookingID)], ['Name', esc(b.Name)], ['Phone', esc(b.Phone)], ['Email', esc(b.Email)],\n         ['Service', esc(b.Service)], ['When', esc(dateText + ' at ' + b.Time)],\n         resched ? ['Previous time', esc(b.previousWhen)] : null,\n         ['Notes', esc(b.Notes).replace(/\\n/g, '<br>')]]\n});\nreturn [{ json: {\n  clientSubject: `${resched ? 'Booking updated' : 'Booking confirmed'} - ${b.BookingID}`, clientHtml,\n  ownerSubject: `${warns.length ? '⚠️ ' : ''}${resched ? 'Booking moved' : 'New booking'}: ${b.Name} - ${b.Slot}`, ownerHtml,\n  screenWhen: `${dateText} at ${b.Time}`\n} }];"
+      },
+      "id": "f6a539d2-a87e-4084-ae2f-694487912bf3",
+      "name": "Build Emails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6020,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Decide').first().json.Email }}",
+        "subject": "={{ $('Build Emails').first().json.clientSubject }}",
+        "message": "={{ $('Build Emails').first().json.clientHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b489b8df-14e0-4e78-b052-a160594db219",
+      "name": "Email Client - Confirmed",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        6260,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Config').first().json.ownerEmail }}",
+        "subject": "={{ $('Build Emails').first().json.ownerSubject }}",
+        "message": "={{ $('Build Emails').first().json.ownerHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "964553b1-2159-4c85-91d9-0c511cc18193",
+      "name": "Email Owner",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        6500,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "={{ $('Decide').first().json.mode === 'change' ? 'Booking updated ✅' : 'Booking confirmed ✅' }}",
+        "completionMessage": "={{ 'Thank you ' + $('Decide').first().json.FirstName + '! Booking ID ' + $('Decide').first().json.BookingID + ': ' + $('Build Emails').first().json.screenWhen + '. ' + ($('Email Client - Confirmed').first().json.error ? 'We could not send the confirmation email, so please keep these details.' : 'We sent the details to your email.') }}",
+        "options": {
+          "appendAttribution": false,
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #16a34a;\n\t--color-submit-btn-bg: #16a34a;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #16a34a;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #dcfce7 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #16a34a !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #15803d !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "171f1352-d7e9-4b38-a129-43127303ad06",
+      "name": "Done - Confirmed",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        6740,
+        0
+      ],
+      "webhookId": "29ef0c47-f297-48f5-b54f-11526f931965"
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst THEMES = { blue: '#2563eb', green: '#16a34a', red: '#dc2626', amber: '#d97706' };\n// rows = [[label, valueHtml], ...]   (valueHtml must already be escaped with esc())\nfunction emailHtml(o) {\n  const c = THEMES[o.theme || 'blue'];\n  const rows = (o.rows || []).filter(r => r && r[1] !== '' && r[1] != null).map(r =>\n    `<tr><td style=\"padding:9px 14px 9px 0;color:#64748b;font-size:13px;white-space:nowrap;vertical-align:top\">${r[0]}</td><td style=\"padding:9px 0;color:#0f172a;font-size:15px;font-weight:600\">${r[1]}</td></tr>`).join('');\n  const box = rows ? `<tr><td style=\"padding:20px 32px 0\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px\"><tr><td style=\"padding:8px 20px\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">${rows}</table></td></tr></table></td></tr>` : '';\n  const btn = o.button ? `<tr><td style=\"padding:24px 32px 0\"><a href=\"${esc(o.button.url)}\" style=\"display:inline-block;background:${c};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:10px\">${esc(o.button.label)}</a></td></tr>` : '';\n  const note = o.note ? `<tr><td style=\"padding:20px 32px 0;font-size:13px;line-height:1.6;color:#64748b\">${o.note}</td></tr>` : '';\n  return `<div style=\"margin:0;padding:24px 12px;background:#eef2f7;font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;margin:0 auto\"><tr><td>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden\">\n<tr><td style=\"background:${c};height:6px;line-height:6px;font-size:0\">&nbsp;</td></tr>\n<tr><td style=\"padding:28px 32px 0\"><div style=\"font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c}\">${esc(o.business)}</div>\n<h1 style=\"margin:10px 0 0;font-size:24px;line-height:1.3;color:#0f172a\">${o.icon || ''} ${esc(o.title)}</h1></td></tr>\n<tr><td style=\"padding:12px 32px 0;font-size:15px;line-height:1.7;color:#334155\">${o.intro || ''}</td></tr>\n${box}${btn}${note}\n<tr><td style=\"padding:28px 32px\"><div style=\"border-top:1px solid #e2e8f0;padding-top:16px;font-size:12px;color:#94a3b8\">${esc(o.business)}</div></td></tr>\n</table></td></tr></table></div>`;\n}\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\nconst cfg = $('Config').first().json;\nconst b = $('Decide').first().json;\nconst err = errText($input.first().json.error);\nlet Reason = 'Sorry, a technical problem stopped us from saving your booking. Please try again in a few minutes.';\nif (b.mode === 'change') Reason += ' Your current booking was not changed.';\nreturn [{ json: { ...b, Reason,\n  alertSubject: `⚠️ Booking failed (calendar): ${b.Name} - ${b.Slot}`,\n  alertHtml: emailHtml({ business: cfg.businessName, theme: 'red', icon: '⚠️', title: 'A booking could not be saved',\n    intro: 'Google Calendar did not accept the new event, so nothing was booked. The client was told to try again.',\n    rows: [['Name', esc(b.Name)], ['Email', esc(b.Email)], ['Phone', esc(b.Phone)], ['Service', esc(b.Service)], ['When', esc(b.Slot)], ['Error', esc(String(err).slice(0, 300))]] })\n} }];"
+      },
+      "id": "aa39af01-9fa1-4e2a-8119-65f6301de2fb",
+      "name": "Calendar Failed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5300,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Config').first().json.ownerEmail }}",
+        "subject": "={{ $('Calendar Failed').first().json.alertSubject }}",
+        "message": "={{ $('Calendar Failed').first().json.alertHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "7a278066-49c2-4304-865d-e143a5388e48",
+      "name": "Email Owner - Alert (Calendar)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        5540,
+        320
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "// The calendar event exists but Google Sheets refused the row. The next node removes the event again.\nconst b = $('Decide').first().json;\nconst e = $input.first().json || {};\nconst errText = x => typeof x === 'string' ? x : ((x && (x.message || x.description)) || JSON.stringify(x || ''));\nlet Reason = 'Sorry, a technical problem stopped us from saving your booking. Please try again in a few minutes.';\nif (b.mode === 'change') Reason += ' Your current booking was not changed.';\nreturn [{ json: { Reason, sheetError: String(errText(e.error !== undefined ? e.error : e)).slice(0, 300) } }];"
+      },
+      "id": "3772804a-b11d-4303-acc1-502e519906e5",
+      "name": "Sheet Failed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5300,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.calendarId }}",
+          "mode": "id"
+        },
+        "eventId": "={{ $('Add to Calendar').first().json.id || 'missing' }}",
+        "options": {
+          "sendUpdates": "none"
+        }
+      },
+      "id": "6fe93adb-e135-417d-97f0-ed1df0898daf",
+      "name": "Rollback Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        5540,
+        520
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "jDGjtJqOCtHguLkr",
+          "name": "Google Calendar account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst THEMES = { blue: '#2563eb', green: '#16a34a', red: '#dc2626', amber: '#d97706' };\n// rows = [[label, valueHtml], ...]   (valueHtml must already be escaped with esc())\nfunction emailHtml(o) {\n  const c = THEMES[o.theme || 'blue'];\n  const rows = (o.rows || []).filter(r => r && r[1] !== '' && r[1] != null).map(r =>\n    `<tr><td style=\"padding:9px 14px 9px 0;color:#64748b;font-size:13px;white-space:nowrap;vertical-align:top\">${r[0]}</td><td style=\"padding:9px 0;color:#0f172a;font-size:15px;font-weight:600\">${r[1]}</td></tr>`).join('');\n  const box = rows ? `<tr><td style=\"padding:20px 32px 0\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px\"><tr><td style=\"padding:8px 20px\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">${rows}</table></td></tr></table></td></tr>` : '';\n  const btn = o.button ? `<tr><td style=\"padding:24px 32px 0\"><a href=\"${esc(o.button.url)}\" style=\"display:inline-block;background:${c};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:10px\">${esc(o.button.label)}</a></td></tr>` : '';\n  const note = o.note ? `<tr><td style=\"padding:20px 32px 0;font-size:13px;line-height:1.6;color:#64748b\">${o.note}</td></tr>` : '';\n  return `<div style=\"margin:0;padding:24px 12px;background:#eef2f7;font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;margin:0 auto\"><tr><td>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden\">\n<tr><td style=\"background:${c};height:6px;line-height:6px;font-size:0\">&nbsp;</td></tr>\n<tr><td style=\"padding:28px 32px 0\"><div style=\"font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c}\">${esc(o.business)}</div>\n<h1 style=\"margin:10px 0 0;font-size:24px;line-height:1.3;color:#0f172a\">${o.icon || ''} ${esc(o.title)}</h1></td></tr>\n<tr><td style=\"padding:12px 32px 0;font-size:15px;line-height:1.7;color:#334155\">${o.intro || ''}</td></tr>\n${box}${btn}${note}\n<tr><td style=\"padding:28px 32px\"><div style=\"border-top:1px solid #e2e8f0;padding-top:16px;font-size:12px;color:#94a3b8\">${esc(o.business)}</div></td></tr>\n</table></td></tr></table></div>`;\n}\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\nconst cfg = $('Config').first().json;\nconst b = $('Decide').first().json;\nconst f = $('Sheet Failed').first().json;\nconst rb = $input.first().json || {};\nconst rolledBack = !rb.error;\nconst intro = rolledBack\n  ? 'Google Sheets did not accept the booking. The new calendar event was removed automatically, so nothing was booked. The client was told to try again.'\n  : '⚠️ Google Sheets did not accept the booking AND the new calendar event could not be removed. Please delete the event by hand: ' + esc(b.Slot);\nreturn [{ json: {\n  alertSubject: `⚠️ Booking failed (sheet): ${b.Name} - ${b.Slot}`,\n  alertHtml: emailHtml({ business: cfg.businessName, theme: rolledBack ? 'amber' : 'red', icon: '⚠️', title: 'A booking could not be saved',\n    intro,\n    rows: [['Booking ID', esc(b.BookingID)], ['Name', esc(b.Name)], ['Email', esc(b.Email)], ['Phone', esc(b.Phone)], ['Service', esc(b.Service)], ['When', esc(b.Slot)], ['Error', esc(f.sheetError)]] })\n} }];"
+      },
+      "id": "0d05e844-9c60-4abc-b3ab-0e3878fbcf5c",
+      "name": "Build Sheet Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5780,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Config').first().json.ownerEmail }}",
+        "subject": "={{ $('Build Sheet Alert').first().json.alertSubject }}",
+        "message": "={{ $('Build Sheet Alert').first().json.alertHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "49f77a97-b8ad-4427-aad9-068c8b2faba2",
+      "name": "Email Owner - Alert (Sheet)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        6020,
+        520
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst THEMES = { blue: '#2563eb', green: '#16a34a', red: '#dc2626', amber: '#d97706' };\n// rows = [[label, valueHtml], ...]   (valueHtml must already be escaped with esc())\nfunction emailHtml(o) {\n  const c = THEMES[o.theme || 'blue'];\n  const rows = (o.rows || []).filter(r => r && r[1] !== '' && r[1] != null).map(r =>\n    `<tr><td style=\"padding:9px 14px 9px 0;color:#64748b;font-size:13px;white-space:nowrap;vertical-align:top\">${r[0]}</td><td style=\"padding:9px 0;color:#0f172a;font-size:15px;font-weight:600\">${r[1]}</td></tr>`).join('');\n  const box = rows ? `<tr><td style=\"padding:20px 32px 0\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px\"><tr><td style=\"padding:8px 20px\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">${rows}</table></td></tr></table></td></tr>` : '';\n  const btn = o.button ? `<tr><td style=\"padding:24px 32px 0\"><a href=\"${esc(o.button.url)}\" style=\"display:inline-block;background:${c};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:10px\">${esc(o.button.label)}</a></td></tr>` : '';\n  const note = o.note ? `<tr><td style=\"padding:20px 32px 0;font-size:13px;line-height:1.6;color:#64748b\">${o.note}</td></tr>` : '';\n  return `<div style=\"margin:0;padding:24px 12px;background:#eef2f7;font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;margin:0 auto\"><tr><td>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden\">\n<tr><td style=\"background:${c};height:6px;line-height:6px;font-size:0\">&nbsp;</td></tr>\n<tr><td style=\"padding:28px 32px 0\"><div style=\"font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c}\">${esc(o.business)}</div>\n<h1 style=\"margin:10px 0 0;font-size:24px;line-height:1.3;color:#0f172a\">${o.icon || ''} ${esc(o.title)}</h1></td></tr>\n<tr><td style=\"padding:12px 32px 0;font-size:15px;line-height:1.7;color:#334155\">${o.intro || ''}</td></tr>\n${box}${btn}${note}\n<tr><td style=\"padding:28px 32px\"><div style=\"border-top:1px solid #e2e8f0;padding-top:16px;font-size:12px;color:#94a3b8\">${esc(o.business)}</div></td></tr>\n</table></td></tr></table></div>`;\n}\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\nconst cfg = $('Config').first().json;\nconst d = $('Decide').first().json;\nlet reason = d.Reason;\nfor (const n of ['Calendar Failed', 'Sheet Failed']) {\n  if ($(n).isExecuted) { try { reason = $(n).first().json.Reason || reason; } catch (e) {} }\n}\nconst clientHtml = emailHtml({\n  business: cfg.businessName, theme: 'red', icon: '⚠️', title: 'We could not confirm your booking',\n  intro: `Hi ${esc(d.FirstName || 'there')},<br>${esc(reason)}`,\n  button: { label: 'Try again', url: cfg.formUrl },\n  note: 'Thank you for your patience.'\n});\nreturn [{ json: { to: d.Email, subject: 'We could not confirm your booking', clientHtml, reason } }];"
+      },
+      "id": "aebdd19e-cb79-4513-8d07-b795e71588dc",
+      "name": "Build Reject Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6260,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.clientHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "ab09f11b-c4a3-4a2f-b5d8-5213e8418cc0",
+      "name": "Email Client - Rejected",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        6500,
+        420
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "We could not confirm your booking",
+        "completionMessage": "={{ $('Build Reject Email').first().json.reason + ($('Email Client - Rejected').first().json.error ? '' : ' We also sent you an email.') }}",
+        "options": {
+          "appendAttribution": false,
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #dc2626;\n\t--color-submit-btn-bg: #dc2626;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #dc2626;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #fee2e2 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #dc2626 !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #b91c1c !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "3cdd1bc0-3e2b-41e3-8f68-cde987bd74ec",
+      "name": "Done - Rejected",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        6740,
+        420
+      ],
+      "webhookId": "ce077fb9-5430-4dca-8735-7b9d62e3497c"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst pb = $('Process Bookings').first().json;\nconst fields = [\n  { fieldLabel: 'Which booking do you want to cancel?', fieldType: 'dropdown', requiredField: true, fieldOptions: { values: (pb.changeable || []).map(b => ({ option: b.label })) } },\n  { fieldLabel: 'Are you sure?', fieldType: 'dropdown', requiredField: true, fieldOptions: { values: [{ option: 'No, keep my booking' }, { option: 'Yes, cancel this booking' }] } }\n];\nreturn [{ json: {\n  formTitle: 'Cancel Your Appointment',\n  formDescription: `Choose the booking you want to cancel. Bookings that start in less than ${cfg.minChangeHours} hours can only be canceled by contacting us.`,\n  formJson: JSON.stringify(fields)\n} }];"
+      },
+      "id": "d488fa2a-60ba-4c09-9001-2695b256dd0a",
+      "name": "Build Cancel Form",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1700,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "defineForm": "json",
+        "jsonOutput": "={{ $('Build Cancel Form').first().json.formJson }}",
+        "options": {
+          "formTitle": "={{ $('Build Cancel Form').first().json.formTitle }}",
+          "formDescription": "={{ $('Build Cancel Form').first().json.formDescription }}",
+          "buttonLabel": "Continue",
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #d97706;\n\t--color-submit-btn-bg: #d97706;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #d97706;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #fef3c7 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #d97706 !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #b45309 !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "41530ac9-2af4-4d55-94cd-accebad71afd",
+      "name": "Confirm Cancel",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        900
+      ],
+      "webhookId": "ba051b94-3648-44c5-bdad-8ac36016d067"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst pb = $('Process Bookings').first().json;\nconst f = $input.first().json;\nconst now = DateTime.now().setZone(cfg.timezone);\nconst id = String(f['Which booking do you want to cancel?'] || '').split(' | ')[0].trim();\nconst booking = (pb.changeable || []).find(b => b.bookingId === id) || null;\nconst confirm = String(f['Are you sure?'] || '').trim().startsWith('Yes');\nlet decision = 'cancel';\nlet title = '';\nlet message = '';\nif (!booking) {\n  decision = 'problem'; title = 'Booking not found';\n  message = 'We could not find the booking you selected. Nothing was canceled. Please open the form again.';\n} else if (!confirm) {\n  decision = 'keep';\n} else if (DateTime.fromISO(booking.startISO).diff(now, 'hours').hours < (Number(cfg.minChangeHours) || 0)) {\n  decision = 'problem'; title = 'Please contact us';\n  message = `Your booking on ${booking.whenText} starts very soon, so it cannot be canceled online. Please contact us directly and we will help you.`;\n}\nreturn [{ json: { decision, title, message, booking, nowText: now.toFormat('yyyy-LL-dd HH:mm') } }];"
+      },
+      "id": "0e73507b-a878-411f-a3b4-7458a78ab92b",
+      "name": "Resolve Cancel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2180,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5429a4cf-1136-4db8-a01b-74d9de71891d",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cancel"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "53d1585e-cca1-49e1-8562-0dd90cdec9be",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "keep",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Keep"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Problem"
+        }
+      },
+      "id": "6af3afb9-7ff2-45ba-aaa1-7f05672983e4",
+      "name": "Cancel Decision",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2420,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Bookings",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking ID": "={{ $('Resolve Cancel').first().json.booking.bookingId }}",
+            "Status": "Canceled",
+            "Canceled At": "={{ $('Resolve Cancel').first().json.nowText }}",
+            "Last Updated": "={{ $('Resolve Cancel').first().json.nowText }}"
+          },
+          "matchingColumns": [
+            "Booking ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking ID",
+              "displayName": "Booking ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start Time",
+              "displayName": "Start Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End Time",
+              "displayName": "End Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duration (min)",
+              "displayName": "Duration (min)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar Event ID",
+              "displayName": "Calendar Event ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Changed Count",
+              "displayName": "Changed Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Previous Time",
+              "displayName": "Previous Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Canceled At",
+              "displayName": "Canceled At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reminder Sent",
+              "displayName": "Reminder Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "VA Notes",
+              "displayName": "VA Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "fbeab3c0-e534-4f3b-8441-e7bed27e4b84",
+      "name": "Cancel: Update Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2660,
+        800
+      ],
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.calendarId }}",
+          "mode": "id"
+        },
+        "eventId": "={{ $('Resolve Cancel').first().json.booking.eventId || 'missing' }}",
+        "options": {
+          "sendUpdates": "none"
+        }
+      },
+      "id": "18c309d7-35f3-453e-97a2-29465910880c",
+      "name": "Cancel: Delete Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2900,
+        800
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "jDGjtJqOCtHguLkr",
+          "name": "Google Calendar account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst THEMES = { blue: '#2563eb', green: '#16a34a', red: '#dc2626', amber: '#d97706' };\n// rows = [[label, valueHtml], ...]   (valueHtml must already be escaped with esc())\nfunction emailHtml(o) {\n  const c = THEMES[o.theme || 'blue'];\n  const rows = (o.rows || []).filter(r => r && r[1] !== '' && r[1] != null).map(r =>\n    `<tr><td style=\"padding:9px 14px 9px 0;color:#64748b;font-size:13px;white-space:nowrap;vertical-align:top\">${r[0]}</td><td style=\"padding:9px 0;color:#0f172a;font-size:15px;font-weight:600\">${r[1]}</td></tr>`).join('');\n  const box = rows ? `<tr><td style=\"padding:20px 32px 0\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px\"><tr><td style=\"padding:8px 20px\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">${rows}</table></td></tr></table></td></tr>` : '';\n  const btn = o.button ? `<tr><td style=\"padding:24px 32px 0\"><a href=\"${esc(o.button.url)}\" style=\"display:inline-block;background:${c};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:10px\">${esc(o.button.label)}</a></td></tr>` : '';\n  const note = o.note ? `<tr><td style=\"padding:20px 32px 0;font-size:13px;line-height:1.6;color:#64748b\">${o.note}</td></tr>` : '';\n  return `<div style=\"margin:0;padding:24px 12px;background:#eef2f7;font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;margin:0 auto\"><tr><td>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden\">\n<tr><td style=\"background:${c};height:6px;line-height:6px;font-size:0\">&nbsp;</td></tr>\n<tr><td style=\"padding:28px 32px 0\"><div style=\"font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c}\">${esc(o.business)}</div>\n<h1 style=\"margin:10px 0 0;font-size:24px;line-height:1.3;color:#0f172a\">${o.icon || ''} ${esc(o.title)}</h1></td></tr>\n<tr><td style=\"padding:12px 32px 0;font-size:15px;line-height:1.7;color:#334155\">${o.intro || ''}</td></tr>\n${box}${btn}${note}\n<tr><td style=\"padding:28px 32px\"><div style=\"border-top:1px solid #e2e8f0;padding-top:16px;font-size:12px;color:#94a3b8\">${esc(o.business)}</div></td></tr>\n</table></td></tr></table></div>`;\n}\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\nconst cfg = $('Config').first().json;\nconst e = $('Resolve Cancel').first().json.booking;\nconst email = $('Process Bookings').first().json.email;\nconst name = e.name || email.split('@')[0];\nlet warn = '';\ntry { const d = $('Cancel: Delete Event').first().json; if (d && d.error) warn = 'The calendar event could not be deleted automatically. Please delete it by hand: ' + esc(e.whenText); } catch (x) {}\n\nconst clientHtml = emailHtml({\n  business: cfg.businessName, theme: 'amber', icon: '🗓️', title: 'Booking canceled',\n  intro: `Hi ${esc(name.split(' ')[0])},<br>Your booking has been canceled as you asked. Nothing else is needed from you.`,\n  rows: [['Booking ID', esc(e.bookingId)], ['Service', esc(e.service)], ['Was scheduled for', esc(e.whenText)]],\n  button: { label: 'Book a new appointment', url: cfg.formUrl },\n  note: 'We hope to see you another time.'\n});\nconst ownerHtml = emailHtml({\n  business: cfg.businessName, theme: warn ? 'red' : 'amber', icon: '🗓️', title: 'Booking canceled by the client',\n  intro: warn ? `<div style=\"background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:10px;padding:12px 14px\">⚠️ ${warn}</div>` : 'The client canceled this booking. The time is free again.',\n  rows: [['Booking ID', esc(e.bookingId)], ['Name', esc(name)], ['Email', esc(email)], ['Phone', esc(e.phone)], ['Service', esc(e.service)], ['Was scheduled for', esc(e.whenText)]]\n});\nreturn [{ json: {\n  clientSubject: `Booking canceled - ${e.bookingId}`, clientHtml,\n  ownerSubject: `${warn ? '⚠️ ' : ''}Booking canceled: ${name} - ${e.date} ${e.time}`, ownerHtml,\n  to: email\n} }];"
+      },
+      "id": "4cca1a8a-47c9-4726-9260-eb256e271374",
+      "name": "Build Cancel Emails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3140,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Build Cancel Emails').first().json.to }}",
+        "subject": "={{ $('Build Cancel Emails').first().json.clientSubject }}",
+        "message": "={{ $('Build Cancel Emails').first().json.clientHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a7e85d88-350b-40a0-8fec-f4880f390079",
+      "name": "Email Client - Canceled",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3380,
+        800
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Config').first().json.ownerEmail }}",
+        "subject": "={{ $('Build Cancel Emails').first().json.ownerSubject }}",
+        "message": "={{ $('Build Cancel Emails').first().json.ownerHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d304ad42-33e5-4da2-9be0-5d22794bb022",
+      "name": "Email Owner - Canceled",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3620,
+        800
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Booking canceled",
+        "completionMessage": "={{ 'Your booking on ' + $('Resolve Cancel').first().json.booking.whenText + ' was canceled. ' + ($('Email Client - Canceled').first().json.error ? 'We could not send the confirmation email.' : 'We sent you a confirmation email.') }}",
+        "options": {
+          "appendAttribution": false,
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #d97706;\n\t--color-submit-btn-bg: #d97706;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #d97706;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #fef3c7 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #d97706 !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #b45309 !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "69cf6471-1ccb-4460-8526-29e59f49047e",
+      "name": "Done - Canceled",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        3860,
+        800
+      ],
+      "webhookId": "b101504d-ab0c-4adf-8e67-c7475ae7b9e9"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "No changes made 👍",
+        "completionMessage": "={{ 'Your booking on ' + $('Resolve Cancel').first().json.booking.whenText + ' is still confirmed. See you then!' }}",
+        "options": {
+          "appendAttribution": false,
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #16a34a;\n\t--color-submit-btn-bg: #16a34a;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #16a34a;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #dcfce7 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #16a34a !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #15803d !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "81a28ea8-1793-4270-a18f-efcef23e138f",
+      "name": "Done - Kept",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        2660,
+        1150
+      ],
+      "webhookId": "0e632932-9396-4b73-ae3d-e357b36a77a3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst THEMES = { blue: '#2563eb', green: '#16a34a', red: '#dc2626', amber: '#d97706' };\n// rows = [[label, valueHtml], ...]   (valueHtml must already be escaped with esc())\nfunction emailHtml(o) {\n  const c = THEMES[o.theme || 'blue'];\n  const rows = (o.rows || []).filter(r => r && r[1] !== '' && r[1] != null).map(r =>\n    `<tr><td style=\"padding:9px 14px 9px 0;color:#64748b;font-size:13px;white-space:nowrap;vertical-align:top\">${r[0]}</td><td style=\"padding:9px 0;color:#0f172a;font-size:15px;font-weight:600\">${r[1]}</td></tr>`).join('');\n  const box = rows ? `<tr><td style=\"padding:20px 32px 0\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px\"><tr><td style=\"padding:8px 20px\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">${rows}</table></td></tr></table></td></tr>` : '';\n  const btn = o.button ? `<tr><td style=\"padding:24px 32px 0\"><a href=\"${esc(o.button.url)}\" style=\"display:inline-block;background:${c};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:10px\">${esc(o.button.label)}</a></td></tr>` : '';\n  const note = o.note ? `<tr><td style=\"padding:20px 32px 0;font-size:13px;line-height:1.6;color:#64748b\">${o.note}</td></tr>` : '';\n  return `<div style=\"margin:0;padding:24px 12px;background:#eef2f7;font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;margin:0 auto\"><tr><td>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden\">\n<tr><td style=\"background:${c};height:6px;line-height:6px;font-size:0\">&nbsp;</td></tr>\n<tr><td style=\"padding:28px 32px 0\"><div style=\"font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c}\">${esc(o.business)}</div>\n<h1 style=\"margin:10px 0 0;font-size:24px;line-height:1.3;color:#0f172a\">${o.icon || ''} ${esc(o.title)}</h1></td></tr>\n<tr><td style=\"padding:12px 32px 0;font-size:15px;line-height:1.7;color:#334155\">${o.intro || ''}</td></tr>\n${box}${btn}${note}\n<tr><td style=\"padding:28px 32px\"><div style=\"border-top:1px solid #e2e8f0;padding-top:16px;font-size:12px;color:#94a3b8\">${esc(o.business)}</div></td></tr>\n</table></td></tr></table></div>`;\n}\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\nconst cfg = $('Config').first().json;\nconst e = $('Resolve Cancel').first().json.booking;\nconst email = $('Process Bookings').first().json.email;\nconst err = errText($input.first().json.error);\nreturn [{ json: {\n  alertSubject: `⚠️ Cancel failed: ${email}`,\n  alertHtml: emailHtml({ business: cfg.businessName, theme: 'red', icon: '⚠️', title: 'A client could not cancel online',\n    intro: 'Google Sheets did not accept the status change, so nothing was canceled. The booking is still active. Please contact the client.',\n    rows: [['Email', esc(email)], ['Booking ID', esc(e.bookingId)], ['When', esc(e.whenText)], ['Error', esc(String(err).slice(0, 300))]] })\n} }];"
+      },
+      "id": "55e19a86-9119-4fde-9eb2-57a75c69258a",
+      "name": "Build Cancel Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2900,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Config').first().json.ownerEmail }}",
+        "subject": "={{ $('Build Cancel Alert').first().json.alertSubject }}",
+        "message": "={{ $('Build Cancel Alert').first().json.alertHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a1a87655-1973-420b-b385-1f79674d0046",
+      "name": "Email Owner - Alert (Cancel)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3140,
+        1000
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "We could not cancel it",
+        "completionMessage": "Sorry, a technical problem stopped us from canceling your booking. Your booking is still active. We have been notified, please contact us directly.",
+        "options": {
+          "appendAttribution": false,
+          "customCss": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');\n\n:root {\n\t--font-family: 'Inter', 'Segoe UI', Arial, sans-serif;\n\t--font-weight-normal: 400;\n\t--font-weight-bold: 600;\n\t--font-size-body: 14px;\n\t--font-size-label: 15px;\n\t--font-size-input: 16px;\n\t--font-size-header: 28px;\n\t--font-size-paragraph: 15px;\n\t--font-size-link: 13px;\n\t--font-size-error: 13px;\n\t--font-size-subheader: 15px;\n\t--color-background: #eef2f7;\n\t--color-card-bg: #ffffff;\n\t--color-card-border: #e2e8f0;\n\t--color-card-shadow: rgba(15, 23, 42, 0.10);\n\t--color-link: #64748b;\n\t--color-header: #0f172a;\n\t--color-label: #1e293b;\n\t--color-input-border: #cbd5e1;\n\t--color-input-text: #0f172a;\n\t--color-focus-border: #dc2626;\n\t--color-submit-btn-bg: #dc2626;\n\t--color-submit-btn-text: #ffffff;\n\t--color-error: #dc2626;\n\t--color-required: #ef4444;\n\t--color-clear-button-bg: #64748b;\n\t--color-html-text: #334155;\n\t--color-html-link: #dc2626;\n\t--color-header-subtext: #64748b;\n\t--border-radius-card: 18px;\n\t--border-radius-input: 10px;\n\t--border-radius-clear-btn: 50%;\n\t--card-border-radius: 18px;\n\t--padding-container-top: 32px;\n\t--padding-card: 32px;\n\t--margin-bottom-card: 20px;\n\t--padding-form-input: 14px;\n\t--card-padding: 32px;\n\t--card-margin-bottom: 20px;\n\t--container-width: 520px;\n\t--submit-btn-height: 52px;\n\t--checkbox-size: 20px;\n\t--box-shadow-card: 0px 20px 50px 0px var(--color-card-shadow);\n\t--opacity-placeholder: 0.6;\n}\nbody {\n  background: linear-gradient(160deg, #eef2f7 0%, #fee2e2 100%) !important;\n}\nform, .card {\n  border-top: 5px solid #dc2626 !important;\n}\nh1 {\n  font-weight: 700 !important;\n  letter-spacing: -0.3px;\n}\nlabel {\n  font-weight: 600 !important;\n}\ninput:focus, select:focus, textarea:focus {\n  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15) !important;\n  outline: none !important;\n}\nbutton[type=\"submit\"], button {\n  width: 100% !important;\n  font-weight: 600 !important;\n  border-radius: 10px !important;\n  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.30);\n  transition: transform .1s ease, background .15s ease;\n}\nbutton[type=\"submit\"]:hover, button:hover {\n  background: #b91c1c !important;\n  transform: translateY(-1px);\n}"
+        }
+      },
+      "id": "448ca162-11ad-4dcc-973b-6527a0421a8f",
+      "name": "Done - Cancel Failed",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        3380,
+        1000
+      ],
+      "webhookId": "fb8f2696-b59c-4368-adf0-53ca6b626b8f"
+    },
+    {
+      "parameters": {},
+      "id": "6ff1e902-c06b-43f8-9062-42630072a269",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1750
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst THEMES = { blue: '#2563eb', green: '#16a34a', red: '#dc2626', amber: '#d97706' };\n// rows = [[label, valueHtml], ...]   (valueHtml must already be escaped with esc())\nfunction emailHtml(o) {\n  const c = THEMES[o.theme || 'blue'];\n  const rows = (o.rows || []).filter(r => r && r[1] !== '' && r[1] != null).map(r =>\n    `<tr><td style=\"padding:9px 14px 9px 0;color:#64748b;font-size:13px;white-space:nowrap;vertical-align:top\">${r[0]}</td><td style=\"padding:9px 0;color:#0f172a;font-size:15px;font-weight:600\">${r[1]}</td></tr>`).join('');\n  const box = rows ? `<tr><td style=\"padding:20px 32px 0\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px\"><tr><td style=\"padding:8px 20px\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">${rows}</table></td></tr></table></td></tr>` : '';\n  const btn = o.button ? `<tr><td style=\"padding:24px 32px 0\"><a href=\"${esc(o.button.url)}\" style=\"display:inline-block;background:${c};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:10px\">${esc(o.button.label)}</a></td></tr>` : '';\n  const note = o.note ? `<tr><td style=\"padding:20px 32px 0;font-size:13px;line-height:1.6;color:#64748b\">${o.note}</td></tr>` : '';\n  return `<div style=\"margin:0;padding:24px 12px;background:#eef2f7;font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;margin:0 auto\"><tr><td>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden\">\n<tr><td style=\"background:${c};height:6px;line-height:6px;font-size:0\">&nbsp;</td></tr>\n<tr><td style=\"padding:28px 32px 0\"><div style=\"font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c}\">${esc(o.business)}</div>\n<h1 style=\"margin:10px 0 0;font-size:24px;line-height:1.3;color:#0f172a\">${o.icon || ''} ${esc(o.title)}</h1></td></tr>\n<tr><td style=\"padding:12px 32px 0;font-size:15px;line-height:1.7;color:#334155\">${o.intro || ''}</td></tr>\n${box}${btn}${note}\n<tr><td style=\"padding:28px 32px\"><div style=\"border-top:1px solid #e2e8f0;padding-top:16px;font-size:12px;color:#94a3b8\">${esc(o.business)}</div></td></tr>\n</table></td></tr></table></div>`;\n}\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\n// Safety net: runs when ANY node of this workflow fails in a way that was not handled.\nconst OWNER_EMAIL = 'YOUR_EMAIL';   // <-- same address as ownerEmail in the Config node\nconst BUSINESS = 'Booking system';\nconst e = $input.first().json || {};\nconst ex = e.execution || {};\nconst wf = e.workflow || {};\nconst html = emailHtml({\n  business: BUSINESS, theme: 'red', icon: '⚠️', title: 'The booking workflow had an error',\n  intro: 'A client may have seen an error page. Please check the execution.',\n  rows: [['Workflow', esc(wf.name)], ['Failed node', esc(ex.lastNodeExecuted)], ['Error', esc(String(errText(ex.error)).slice(0, 400))], ['Execution ID', esc(ex.id)]],\n  button: ex.url ? { label: 'Open the execution', url: ex.url } : null\n});\nreturn [{ json: { to: OWNER_EMAIL, subject: `⚠️ Booking workflow error: ${ex.lastNodeExecuted || 'unknown node'}`, html } }];"
+      },
+      "id": "9f11b4fd-5854-472a-abf7-139f9de5b2a1",
+      "name": "Build Error Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        1750
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "41564afe-979d-4337-840f-933c231cf445",
+      "name": "Email Owner - Workflow Error",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        1750
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "content": "## Setup (do this once)\n1. Open **Config** and fill `businessName`, `ownerEmail`, `calendarId`, `formUrl` (the production URL of **Start Form**) and `sheetId` (the long ID inside the Google Sheet link).\n2. Pick a **Google Sheets** credential on the 6 Google Sheets nodes.\n3. The sheet needs the tabs **Bookings**, **Services**, **Clients** with their header rows.\n4. Opening hours, closed days and limits are all in **Config**.",
+        "height": 300,
+        "width": 560,
+        "color": 4
+      },
+      "id": "ee48567a-c391-4b46-94f4-e55399ccbaa3",
+      "name": "Note - Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Book a new appointment + Change an appointment\nBoth use the same free-time check and the same save steps.",
+        "height": 110,
+        "width": 520,
+        "color": 7
+      },
+      "id": "419ce4ab-f47c-49c6-a7ac-a10e1dff3c5d",
+      "name": "Note - Book / Change",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Cancel an appointment",
+        "height": 100,
+        "width": 300,
+        "color": 7
+      },
+      "id": "c2cd1417-6824-4a68-bbc1-065dcfaa9b8b",
+      "name": "Note - Cancel",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Safety net\nIn this workflow open **Settings → Error workflow** and choose this same workflow. Also set `OWNER_EMAIL` inside **Build Error Alert**. Any error that was not handled by a node will email the owner.",
+        "height": 170,
+        "width": 560,
+        "color": 6
+      },
+      "id": "7bb28bbf-8e7e-4344-9135-269a9ef13278",
+      "name": "Note - Errors",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1560
+      ]
+    }
+  ],
+  "connections": {
+    "Start Form": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Read Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Request": {
+      "main": [
+        [
+          {
+            "node": "Valid Request?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Request?": {
+      "main": [
+        [
+          {
+            "node": "Read Bookings",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done - Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Bookings": {
+      "main": [
+        [
+          {
+            "node": "Process Bookings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Bookings": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Read Services",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read Services",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Cancel Form",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done - Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done - Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Services": {
+      "main": [
+        [
+          {
+            "node": "Build Service Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Service Form": {
+      "main": [
+        [
+          {
+            "node": "Services OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Services OK?": {
+      "main": [
+        [
+          {
+            "node": "Booking Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done - Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking Details": {
+      "main": [
+        [
+          {
+            "node": "Day Window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Day Window": {
+      "main": [
+        [
+          {
+            "node": "Day OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Day OK?": {
+      "main": [
+        [
+          {
+            "node": "Get Busy Times",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done - Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Busy Times": {
+      "main": [
+        [
+          {
+            "node": "Build Free Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Free Slots": {
+      "main": [
+        [
+          {
+            "node": "Any Free Time?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Free Time?": {
+      "main": [
+        [
+          {
+            "node": "Pick Time",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done - Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Time": {
+      "main": [
+        [
+          {
+            "node": "Prepare Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Booking": {
+      "main": [
+        [
+          {
+            "node": "Re-check Slot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-check Slot": {
+      "main": [
+        [
+          {
+            "node": "Decide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide": {
+      "main": [
+        [
+          {
+            "node": "Confirmed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmed?": {
+      "main": [
+        [
+          {
+            "node": "Add to Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Reject Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Calendar": {
+      "main": [
+        [
+          {
+            "node": "Is Change?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calendar Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Change?": {
+      "main": [
+        [
+          {
+            "node": "Update Booking Row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Booking Row": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sheet Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Event": {
+      "main": [
+        [
+          {
+            "node": "Build Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Booking": {
+      "main": [
+        [
+          {
+            "node": "Save Client",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sheet Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Client": {
+      "main": [
+        [
+          {
+            "node": "Build Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Emails": {
+      "main": [
+        [
+          {
+            "node": "Email Client - Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Client - Confirmed": {
+      "main": [
+        [
+          {
+            "node": "Email Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Owner": {
+      "main": [
+        [
+          {
+            "node": "Done - Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Failed": {
+      "main": [
+        [
+          {
+            "node": "Email Owner - Alert (Calendar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Owner - Alert (Calendar)": {
+      "main": [
+        [
+          {
+            "node": "Build Reject Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheet Failed": {
+      "main": [
+        [
+          {
+            "node": "Rollback Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rollback Event": {
+      "main": [
+        [
+          {
+            "node": "Build Sheet Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Sheet Alert": {
+      "main": [
+        [
+          {
+            "node": "Email Owner - Alert (Sheet)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Owner - Alert (Sheet)": {
+      "main": [
+        [
+          {
+            "node": "Build Reject Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Reject Email": {
+      "main": [
+        [
+          {
+            "node": "Email Client - Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Client - Rejected": {
+      "main": [
+        [
+          {
+            "node": "Done - Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Cancel Form": {
+      "main": [
+        [
+          {
+            "node": "Confirm Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Cancel": {
+      "main": [
+        [
+          {
+            "node": "Resolve Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Cancel": {
+      "main": [
+        [
+          {
+            "node": "Cancel Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel Decision": {
+      "main": [
+        [
+          {
+            "node": "Cancel: Update Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done - Kept",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done - Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel: Update Sheet": {
+      "main": [
+        [
+          {
+            "node": "Cancel: Delete Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Cancel Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel: Delete Event": {
+      "main": [
+        [
+          {
+            "node": "Build Cancel Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Cancel Emails": {
+      "main": [
+        [
+          {
+            "node": "Email Client - Canceled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Client - Canceled": {
+      "main": [
+        [
+          {
+            "node": "Email Owner - Canceled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Owner - Canceled": {
+      "main": [
+        [
+          {
+            "node": "Done - Canceled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Cancel Alert": {
+      "main": [
+        [
+          {
+            "node": "Email Owner - Alert (Cancel)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Owner - Alert (Cancel)": {
+      "main": [
+        [
+          {
+            "node": "Done - Cancel Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Build Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Error Alert": {
+      "main": [
+        [
+          {
+            "node": "Email Owner - Workflow Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Cairo"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+      }
