@@ -1,0 +1,246 @@
+{
+  "name": "Al-Baraka - Update Inventory Batch (Sub-workflow)",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "confirmed_items",
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "id": "trigger-update-batch",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Inventory",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "get-live-inventory",
+      "name": "Get Inventory Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        560,
+        300
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const requested = $('Execute Workflow Trigger').first().json.confirmed_items || [];\nconst inventory = $input.all().map(e => e.json).filter(r => r.item_name);\n\nconst norm = (s) => String(s ?? '')\n  .replace(/[\\u064B-\\u065F\\u0670\\u0640]/g, '')\n  .replace(/[أإآ]/g, 'ا')\n  .replace(/ى/g, 'ي')\n  .replace(/ة/g, 'ه')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .toLowerCase();\n\nconst plan = new Map();\nconst failed_items = [];\n\nfor (const item of requested) {\n  const qty = Number(item.requested_qty ?? item.quantity);\n  if (!Number.isFinite(qty) || qty <= 0) {\n    failed_items.push({ name: item.name, reason: 'invalid_quantity' });\n    continue;\n  }\n  const key = norm(item.name);\n  const live = inventory.find(r => Number(r.row_number) === Number(item.row_number) && norm(r.item_name) === key)\n    || inventory.find(r => norm(r.item_name) === key);\n  if (!live) {\n    failed_items.push({ name: item.name, requested_qty: qty, reason: 'not_found' });\n    continue;\n  }\n  const entry = plan.get(live.row_number) || { live, qty: 0 };\n  entry.qty += qty;\n  plan.set(live.row_number, entry);\n}\n\nconst updates = [];\nconst updated_items = [];\n\nfor (const { live, qty } of plan.values()) {\n  const current = Number(live.quantity_available);\n  const available = Number.isFinite(current) ? current : 0;\n  if (available < qty) {\n    failed_items.push({ name: live.item_name, requested_qty: qty, available_qty: available, reason: 'insufficient_stock' });\n    continue;\n  }\n  const newQty = available - qty;\n  updates.push({ row_number: live.row_number, quantity_available: newQty });\n  updated_items.push({ name: live.item_name, row_number: live.row_number, requested_qty: qty, new_quantity: newQty });\n}\n\nreturn [{ json: { updates, updated_items, failed_items } }];"
+      },
+      "id": "build-plan",
+      "name": "Build Plan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "has-updates-cond",
+              "leftValue": "={{ $json.updates.length }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "rightValue": 0
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "has-updates",
+      "name": "Has Updates",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1080,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "updates",
+        "options": {}
+      },
+      "id": "split-updates",
+      "name": "Split Updates",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Inventory",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "quantity_available": "={{ $json.quantity_available }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ]
+        },
+        "options": {}
+      },
+      "id": "update-inventory-sheet",
+      "name": "Update Inventory Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1600,
+        200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const plan = $('Build Plan').first().json;\nreturn [{ json: { updated_items: plan.updated_items, failed_items: plan.failed_items } }];"
+      },
+      "id": "update-result",
+      "name": "Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1860,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Inventory Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Inventory Rows": {
+      "main": [
+        [
+          {
+            "node": "Build Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Plan": {
+      "main": [
+        [
+          {
+            "node": "Has Updates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Updates": {
+      "main": [
+        [
+          {
+            "node": "Split Updates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Updates": {
+      "main": [
+        [
+          {
+            "node": "Update Inventory Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Inventory Sheet": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
