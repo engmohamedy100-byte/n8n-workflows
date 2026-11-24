@@ -8,16 +8,25 @@ AI-written reply.
 - **Nodes:** 17 · **Trigger:** Gmail · **Status in export:** inactive
 
 > **Filename mismatch.** The exported file is named "AI Lead Research &
-> Personalized Email Generator", but the workflow it contains is a Gmail
-> classify-label-reply agent. There is no lead-research or list-building logic in
-> the JSON. The folder name follows the contents, not the filename.
+
+Classifies incoming Gmail messages, applies a label, then drafts or sends an
+AI-written reply.
+
+- Source file: `AI Lead Research & Personalized Email Generator.json`
+- Internal name: `reply on message on gmail and put in suitable lable`
+- 17 nodes, Gmail trigger, exported inactive
+
+A note on the filename: the export is called "AI Lead Research & Personalized
+Email Generator", but the workflow inside is a Gmail classify-label-reply agent.
+There is no lead-research or list-building logic in the JSON, so the folder
+follows the contents, not the filename.
 
 ## What it does
 
 On each new Gmail message, an LLM classifier sorts it into one of three
 categories. The message gets the matching label and is marked read, an AI agent
-composes a reply, and a condition decides whether to send it or leave a draft for
-review.
+composes a reply, and a condition decides whether to send it or leave a draft
+for review.
 
 ## Flow
 
@@ -50,12 +59,10 @@ Gmail Trigger
 | If | `if` | Chooses reply vs. draft. |
 | Reply to a message / Create a draft | `gmail` | The two outcomes. |
 
-## Data flow
-
-All three classifier branches converge on `Mark a message as read`, so the AI
+All three classifier branches converge on `Mark a message as read`, so the
 agent sees one item per message regardless of category. The two `Edit Fields`
-nodes normalize each branch's shape before that merge. `Edit Fields2` prepares
-the payload the `If` node tests.
+nodes normalize each branch's shape before that merge, and `Edit Fields2`
+prepares the payload the `If` node tests.
 
 ## Setup
 
@@ -66,34 +73,32 @@ the payload the `If` node tests.
 5. Review the classifier categories and the agent's system prompt.
 6. Set the `If` condition that decides send-vs-draft.
 
-## Credentials required
-
-- Gmail OAuth2
-- Groq API
+Credentials: Gmail OAuth2, Groq API.
 
 ## Known issues
 
-Read from the JSON as exported; nothing here is fixed in this copy.
+Everything below is read from the export as-is; none of it is fixed in this
+copy.
 
-- **The memory key defeats the memory.** `Simple Memory` uses
-  `sessionKey: {{ $('Gmail Trigger').item.json.id }}`. Gmail's `id` is unique per
-  *message*, so every message opens an empty buffer and the memory never carries
-  context. For continuity across a thread the key should be `threadId`. As
-  written it is at least correctly isolated — no cross-conversation bleed — but
-  it is doing no work.
-- **No error handling anywhere.** 0 of 17 nodes set `onError` or `retryOnFail`.
-  A Groq rate-limit response (429) kills the run after the label has already been
-  applied and the message already marked read, leaving the message triaged but
-  unanswered with no retry and no alert.
-- **Not idempotent on failure.** Because labelling and mark-as-read happen
-  *before* the agent runs, a mid-run failure cannot be safely re-run: the trigger
-  will not see the message again, since it is no longer unread.
-- **Auto-sending replies from an LLM is a real risk.** The `If` node is the only
+- The memory key defeats the memory. `Simple Memory` uses
+  `sessionKey: {{ $('Gmail Trigger').item.json.id }}`. Gmail's `id` is unique
+  per message, so every message opens an empty buffer and the memory never
+  carries context. For continuity across a thread the key should be `threadId`.
+  As written it is at least correctly isolated, with no cross-conversation
+  bleed, but it is doing no work.
+- No error handling anywhere. 0 of 17 nodes set `onError` or `retryOnFail`. A
+  Groq rate-limit response (429) kills the run after the label has already been
+  applied and the message already marked read, leaving it triaged but
+  unanswered, with no retry and no alert.
+- Not idempotent on failure. Because labelling and mark-as-read happen before
+  the agent runs, a mid-run failure cannot be safely re-run: the trigger will
+  not see the message again, since it is no longer unread.
+- Auto-sending replies from an LLM is a real risk. The `If` node is the only
   thing between a generated draft and a sent email. Whether its condition is
-  conservative enough is worth reviewing before enabling this on a live mailbox.
-- **No rate-limit protection.** A burst of inbound mail fans out one Groq
+  conservative enough is worth reviewing before enabling this on a live
+  mailbox.
+- No rate-limit protection. A burst of inbound mail fans out one Groq
   classification plus one agent call per message with no queue or throttle.
-- **Unclear:** the classifier's three categories, the `If` condition, and the
-  Gmail trigger's poll interval are all configured inside node parameters that
-  the structural export does not surface plainly. Read them in the n8n editor
-  before relying on this workflow.
+- Unclear from the export: the classifier's three categories, the `If`
+  condition, and the Gmail trigger's poll interval all live inside node
+  parameters. Read them in the n8n editor before relying on this workflow.
