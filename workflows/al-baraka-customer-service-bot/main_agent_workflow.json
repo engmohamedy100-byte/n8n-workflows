@@ -1,0 +1,577 @@
+{
+  "name": "Al-Baraka - Customer Service Bot (Main)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        400
+      ],
+      "webhookId": "PUT_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "أنت \"مساعد شركة البركة لمنتجات الألبان\" - مساعد ذكي يعمل عبر تليجرام لخدمة العملاء وإدارة الطلبات والشكاوى.\n\n# شخصيتك وأسلوبك\n- تتحدث باللهجة المصرية البسيطة والودودة، بشكل احترافي لكن قريب من العميل.\n- لا تستخدم مصطلحات تقنية أو تذكر أسماء الأدوات أو الأنظمة الداخلية أو الجداول أمام العميل.\n- ردودك مختصرة وواضحة، بدون حشو.\n- حافظ دائماً على سياق المحادثة (استخدم الذاكرة) حتى لا تكرر أسئلة أجاب عنها العميل بالفعل.\n\n# معلومات الشركة\nعندما يسأل العميل عن المنتجات، الأسعار، سياسة الاسترجاع، مواعيد العمل، أو أي معلومة عامة عن الشركة، استخدم أداة البحث في قاعدة المعرفة. لا تخترع معلومات غير موجودة فيها.\n\n# التعامل مع الطلبات (Orders)\n1. اجمع كل الأصناف والكميات المطلوبة، واسأل \"في حاجة تانية؟\" قبل المتابعة.\n2. اعرض الطلب كاملاً واطلب تأكيد صريح واحد من العميل.\n3. فور التأكيد، استخدم \"Uniqe_Order_id\" مرة واحدة فقط لتوليد رقم الطلب.\n4. استخدم \"Check Multiple Items\" بكل الأصناف معاً لفحص التوفر. إذا رجعت unmatched_items بها أي صنف، لا تكمل: اسأل العميل يقصد أنهي صنف (واقترح من candidates إن وُجدت)، ثم أعد الفحص بالقائمة المصححة كاملة.\n5. إذا رجعت confirmed_items بها صنف واحد على الأقل، استخدم \"Update Multiple Quantities\" مرة واحدة فقط بكل القائمة كما رجعت من الفحص. اعتمد بعدها على updated_items فقط، وأي صنف في failed_items اعتبره غير متوفر.\n6. إذا كانت updated_items غير فارغة، استخدم \"Add New Order\" مرة واحدة فقط، بنص يجمع كل الأصناف بصيغة \"اسم الصنف × الكمية, اسم الصنف × الكمية\"، ونفس order_id.\n7. إذا كانت unavailable_items أو failed_items غير فارغة، استخدم \"Sent inventory\" مرة واحدة فقط بكل الأصناف الناقصة معاً.\n8. إذا تم تسجيل طلب، استخدم \"sent to preper the order\" مرة واحدة بـ order_id وقائمة updated_items.\n9. أعطِ العميل رقم طلبه وملخصاً بالأصناف المؤكدة (updated_items) والناقصة إن وجدت.\n\n# إلغاء الطلبات\nاطلب رقم الطلب، أكد مع العميل أن الإلغاء سيشمل الطلب بالكامل، ثم استخدم \"Cancel order\" مرة واحدة بعد التأكيد. إذا رجع success=true أخبر العميل أن الطلب اتلغى، ثم استخدم \"sent to preper the order\" مرة واحدة لإخطار فريق التحضير برقم الطلب الملغي. إذا رجع success=false اشرح للعميل السبب ببساطة (الطلب غير موجود، أو ملغي بالفعل، أو لا يمكن إلغاؤه حالياً) ووجّهه لخدمة العملاء عند الحاجة.\n\n# الشكاوى\nتعامل بتعاطف، اجمع التفاصيل، ثم استخدم \"Add New Complain\" لتسجيل الشكوى، وأخبر العميل أنها ستتم متابعتها خلال 48 ساعة.\n\n# قواعد صارمة\n1. لا تنفذ أي عملية كتابة دون تأكيد صريح من العميل أولاً حيثما ينطبق ذلك.\n2. لا تخمن الكمية المتوفرة - اعتمد فقط على نتيجة \"Check Multiple Items\".\n3. لا تفصح للعميل عن تفاصيل داخلية (المدير، فريق التحضير، أسماء الأدوات).\n4. إذا لم تفهم الطلب، اسأل للتوضيح بدلاً من الافتراض.\n5. وجّه العميل لخدمة العملاء البشرية للحالات خارج نطاقك.\n6. لا تستدعِ أي أداة أكثر من مرة واحدة لكل طلب إلا إذا كانت الخطوات تتطلب ذلك صراحة."
+        }
+      },
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "send-text-message",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1000,
+        400
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "id": "openrouter-model",
+      "name": "OpenRouter Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        400,
+        650
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 15
+      },
+      "id": "simple-memory",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        600,
+        650
+      ]
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text"
+      },
+      "id": "embeddings-ollama1",
+      "name": "Embeddings Ollama1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        700,
+        950
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "search_company_knowledge",
+        "toolDescription": "استخدم هذه الأداة للبحث عن معلومات عامة عن الشركة: المنتجات، الأسعار، سياسة الاسترجاع، مواعيد العمل، أو معايير الجودة.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "id": "supabase-vector-store1",
+      "name": "Supabase Vector Store1",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        800
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "استخدم هذه الأداة فقط للاستفسار السريع عن توفر صنف واحد (مثال: هل عندكم زبادي؟). لا تستخدمها أثناء معالجة طلب متعدد الأصناف - استخدم Check Multiple Items لذلك.",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Inventory",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "item_name",
+              "lookupValue": "={{ $fromAI('item_name') }}"
+            }
+          ]
+        }
+      },
+      "id": "read-info",
+      "name": "Read info(item+quantity)",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1000,
+        800
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Uniqe_Order_id",
+        "description": "استخدم هذه الأداة مرة واحدة فقط في بداية معالجة أي طلب جديد لتوليد رقم طلب فريد. استخدم نفس الرقم لكل أصناف نفس الطلب.",
+        "jsCode": "const now = new Date();\nconst pad = (n) => String(n).padStart(2, '0');\nconst datePart = now.getFullYear().toString().slice(-2) + pad(now.getMonth()+1) + pad(now.getDate()) + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());\nconst randomPart = Math.floor(Math.random() * 90 + 10);\nreturn { order_id: `ORD-${datePart}-${randomPart}` };"
+      },
+      "id": "unique-order-id",
+      "name": "Uniqe_Order_id",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "name": "Check_Multiple_Items",
+        "description": "استخدم هذه الأداة مرة واحدة فقط بعد تأكيد العميل لكل أصناف الطلب، لفحص توفر كل الأصناف دفعة واحدة. المدخل: items = [{name, quantity}, ...]. المخرج: confirmed_items و unavailable_items و unmatched_items. يمكن إعادة استدعائها بعد توضيح الأصناف غير المفهومة.",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "PUT_CHECK_INVENTORY_BATCH_WORKFLOW_ID",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "value": {
+            "items": "={{ $fromAI('items', 'قائمة الأصناف والكميات المطلوبة', 'array') }}"
+          }
+        }
+      },
+      "id": "check-multiple-items",
+      "name": "Check Multiple Items",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "name": "Update_Multiple_Quantities",
+        "description": "استخدم هذه الأداة مرة واحدة فقط بعد الحصول على confirmed_items من Check Multiple Items، لخصم الكميات من المخزون لكل الأصناف المتوفرة دفعة واحدة. المخرج: updated_items و failed_items.",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "PUT_UPDATE_INVENTORY_BATCH_WORKFLOW_ID",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "value": {
+            "confirmed_items": "={{ $fromAI('confirmed_items', 'قائمة الأصناف المؤكدة من Check Multiple Items', 'array') }}"
+          }
+        }
+      },
+      "id": "update-multiple-quantities",
+      "name": "Update Multiple Quantities",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "استخدم هذه الأداة مرة واحدة فقط لكل طلب، بعد Check Multiple Items و Update Multiple Quantities. سجّل order_id، customer_chat_id، customer_name، items (نص مجمّع)، status='قيد التحضير'، order_date.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Orders",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $fromAI('order_id') }}",
+            "customer_chat_id": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+            "customer_name": "={{ $fromAI('customer_name') }}",
+            "items": "={{ $fromAI('items_text') }}",
+            "status": "قيد التحضير",
+            "order_date": "={{ $now }}"
+          }
+        }
+      },
+      "id": "add-new-order",
+      "name": "Add New Order",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1800,
+        800
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "استخدم هذه الأداة لتسجيل شكوى العميل بعد جمع تفاصيل كافية عنها.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Complaints",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "complaint_id": "={{ 'CMP-' + Date.now() }}",
+            "customer_chat_id": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+            "customer_name": "={{ $fromAI('customer_name') }}",
+            "item_name": "={{ $fromAI('item_name') }}",
+            "description": "={{ $fromAI('description') }}",
+            "status": "قيد المراجعة",
+            "complaint_date": "={{ $now }}"
+          }
+        }
+      },
+      "id": "add-new-complain",
+      "name": "Add New Complain",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        2000,
+        800
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Cancel_Order",
+        "description": "استخدم هذه الأداة مرة واحدة فقط لإلغاء طلب بالكامل عبر order_id، بعد تأكيد صريح من العميل. المخرج: success، وعند الفشل reason.",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "PUT_CANCEL_ORDER_BATCH_WORKFLOW_ID",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "value": {
+            "order_id": "={{ $fromAI('order_id', 'رقم الطلب المراد إلغاؤه', 'string') }}"
+          }
+        }
+      },
+      "id": "cancel-order",
+      "name": "Cancel order",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "استخدم هذه الأداة إذا كانت unavailable_items غير فارغة، لإرسال كل الأصناف الناقصة للمدير في رسالة واحدة.",
+        "sendTo": "PUT_MANAGER_EMAIL",
+        "subject": "تنبيه نقص مخزون",
+        "message": "={{ $fromAI('message_body', 'نص الرسالة يتضمن اسم كل صنف والكمية المطلوبة والمتاحة') }}",
+        "options": {}
+      },
+      "id": "sent-inventory",
+      "name": "Sent inventory",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        2400,
+        800
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "استخدم هذه الأداة مرة واحدة بعد Add New Order لإخطار فريق التحضير برقم الطلب والأصناف المؤكدة، أو مرة واحدة بعد إلغاء ناجح لإخطارهم برقم الطلب الملغي.",
+        "chatId": "PUT_PREP_TEAM_CHAT_ID",
+        "text": "={{ $fromAI('message_body', 'ملخص الطلب: order_id وقائمة الأصناف المؤكدة') }}",
+        "additionalFields": {}
+      },
+      "id": "sent-to-preper",
+      "name": "sent to preper the order",
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        2600,
+        800
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read info(item+quantity)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Uniqe_Order_id": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Multiple Items": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Multiple Quantities": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add New Order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add New Complain": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sent inventory": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sent to preper the order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
