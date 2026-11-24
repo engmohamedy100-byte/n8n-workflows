@@ -1,0 +1,460 @@
+{
+  "name": "Appointment Reminders - Google Sheets (every 15 min)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "5ca075f9-0327-436d-8651-c8e441d29c54",
+      "name": "Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fc0e5287-9f7f-4cf1-8f4b-7fb3d50de025",
+              "name": "businessName",
+              "value": "YOUR BUSINESS NAME",
+              "type": "string"
+            },
+            {
+              "id": "2d6b0949-204f-440f-8766-b35209970083",
+              "name": "ownerEmail",
+              "value": "YOUR_EMAIL",
+              "type": "string"
+            },
+            {
+              "id": "b2949443-4298-4417-9531-5f8ca5406245",
+              "name": "formUrl",
+              "value": "YOUR_FORM_URL",
+              "type": "string"
+            },
+            {
+              "id": "dc129874-6085-4c41-a809-65867e216241",
+              "name": "sheetId",
+              "value": "YOUR_GOOGLE_SHEET_ID",
+              "type": "string"
+            },
+            {
+              "id": "5d76a823-119f-45c9-a5d2-fd6a6c3355ed",
+              "name": "timezone",
+              "value": "Africa/Cairo",
+              "type": "string"
+            },
+            {
+              "id": "ee8c6810-7c39-4720-bde1-36e2b94fd45d",
+              "name": "locationText",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "aafe7249-af15-4b88-bea3-95e6a2dc1665",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        250,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Bookings",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "15d6516c-2713-4eea-82ad-97700aa62797",
+      "name": "Read Bookings",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        500,
+        190
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst THEMES = { blue: '#2563eb', green: '#16a34a', red: '#dc2626', amber: '#d97706' };\n// rows = [[label, valueHtml], ...]   (valueHtml must already be escaped with esc())\nfunction emailHtml(o) {\n  const c = THEMES[o.theme || 'blue'];\n  const rows = (o.rows || []).filter(r => r && r[1] !== '' && r[1] != null).map(r =>\n    `<tr><td style=\"padding:9px 14px 9px 0;color:#64748b;font-size:13px;white-space:nowrap;vertical-align:top\">${r[0]}</td><td style=\"padding:9px 0;color:#0f172a;font-size:15px;font-weight:600\">${r[1]}</td></tr>`).join('');\n  const box = rows ? `<tr><td style=\"padding:20px 32px 0\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px\"><tr><td style=\"padding:8px 20px\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">${rows}</table></td></tr></table></td></tr>` : '';\n  const btn = o.button ? `<tr><td style=\"padding:24px 32px 0\"><a href=\"${esc(o.button.url)}\" style=\"display:inline-block;background:${c};color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:13px 26px;border-radius:10px\">${esc(o.button.label)}</a></td></tr>` : '';\n  const note = o.note ? `<tr><td style=\"padding:20px 32px 0;font-size:13px;line-height:1.6;color:#64748b\">${o.note}</td></tr>` : '';\n  return `<div style=\"margin:0;padding:24px 12px;background:#eef2f7;font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:560px;margin:0 auto\"><tr><td>\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden\">\n<tr><td style=\"background:${c};height:6px;line-height:6px;font-size:0\">&nbsp;</td></tr>\n<tr><td style=\"padding:28px 32px 0\"><div style=\"font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c}\">${esc(o.business)}</div>\n<h1 style=\"margin:10px 0 0;font-size:24px;line-height:1.3;color:#0f172a\">${o.icon || ''} ${esc(o.title)}</h1></td></tr>\n<tr><td style=\"padding:12px 32px 0;font-size:15px;line-height:1.7;color:#334155\">${o.intro || ''}</td></tr>\n${box}${btn}${note}\n<tr><td style=\"padding:28px 32px\"><div style=\"border-top:1px solid #e2e8f0;padding-top:16px;font-size:12px;color:#94a3b8\">${esc(o.business)}</div></td></tr>\n</table></td></tr></table></div>`;\n}\nconst errText = e => typeof e === 'string' ? e : ((e && (e.message || e.description)) || JSON.stringify(e || ''));\nconst asDate = v => {\n  if (v === undefined || v === null || v === '') return null;\n  const d = /^\\d+$/.test(String(v)) ? DateTime.fromMillis(Number(v)) : DateTime.fromISO(String(v));\n  return d.isValid ? d : null;\n};\n\nconst pad = n => String(n).padStart(2, '0');\n// The sheet keeps dates and times as text. If someone retypes a cell, Google may turn it into a number: handle both.\nconst dStr = v => {\n  if (typeof v === 'number') return DateTime.fromMillis(Date.UTC(1899, 11, 30) + Math.round(v) * 86400000, { zone: 'utc' }).toFormat('yyyy-MM-dd');\n  const s = String(v == null ? '' : v).trim();\n  const m = s.match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})/);\n  return m ? `${m[1]}-${pad(m[2])}-${pad(m[3])}` : s;\n};\nconst tStr = v => {\n  if (typeof v === 'number') { const mins = Math.round((v % 1) * 1440); return `${pad(Math.floor(mins / 60) % 24)}:${pad(mins % 60)}`; }\n  const s = String(v == null ? '' : v).trim();\n  const m = s.match(/^(\\d{1,2}):(\\d{2})/);\n  return m ? `${pad(m[1])}:${m[2]}` : s;\n};\nconst startOf = (r, zone) => DateTime.fromFormat(`${dStr(r['Date'])} ${tStr(r['Start Time'])}`, 'yyyy-MM-dd HH:mm', { zone });\nconst endOf = (r, zone, start) => {\n  const e = DateTime.fromFormat(`${dStr(r['Date'])} ${tStr(r['End Time'])}`, 'yyyy-MM-dd HH:mm', { zone });\n  return (e.isValid && start.isValid && e > start) ? e : start.plus({ minutes: Number(r['Duration (min)']) || 60 });\n};\n// Reads the items coming from the Google Sheets node and checks them\nconst readBookings = items => {\n  const readError = items.find(r => r && r.error);\n  if (readError) throw new Error('Google Sheets read failed: ' + String(errText(readError.error)).slice(0, 300));\n  const hasRows = items.some(r => r && r.row_number !== undefined);\n  if (hasRows && !items.some(r => r && r['Booking ID'] !== undefined && r['Email'] !== undefined && r['Status'] !== undefined)) throw new Error('The header row of the Bookings sheet was changed.');\n  return items.filter(r => r && r['Booking ID'] !== undefined && String(r['Booking ID']).trim() !== '');\n};\n\n// ====== SETTINGS ======\n// Each reminder is sent ONCE, when the appointment is between minMin and maxMin minutes away.\nconst STAGES = [\n  { key: '24h', minMin: 21 * 60, maxMin: 24 * 60 },   // day before (3h grace in case n8n was down)\n  { key: '1h',  minMin: 0,       maxMin: 60 }         // starting soon\n];\n// ======================\nconst cfg = $('Config').first().json;\nconst zone = cfg.timezone;\nconst rows = readBookings($input.all().map(i => i.json));\nconst now = DateTime.now().setZone(zone);\nconst out = [];\nfor (const r of rows) {\n  if (String(r['Status'] || '').trim().toLowerCase() !== 'booked') continue;\n  const email = String(r['Email'] || '').trim();\n  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) continue;\n  const start = startOf(r, zone);\n  if (!start.isValid) continue;\n  const mins = start.diff(now, 'minutes').minutes;\n  const sent = String(r['Reminder Sent'] || '').split(',').map(x => x.trim()).filter(Boolean);\n  const stage = STAGES.find(s => mins > s.minMin && mins <= s.maxMin && !sent.includes(s.key));\n  if (!stage) continue;\n\n  const time = start.toFormat('HH:mm');\n  const dateText = start.toFormat('cccc, d LLLL yyyy');\n  const dayWord = start.hasSame(now, 'day') ? 'today' : 'tomorrow';\n  const first = esc(String(r['Client Name'] || 'there').split(' ')[0]);\n  const is24 = stage.key === '24h';\n  const html = emailHtml({\n    business: cfg.businessName, theme: is24 ? 'blue' : 'green', icon: is24 ? '⏰' : '📍',\n    title: is24 ? 'Appointment reminder' : 'Your appointment is almost here',\n    intro: `Hi ${first},<br>${is24 ? `This is a friendly reminder about your appointment ${dayWord}.` : 'Your appointment starts soon. We are ready for you!'}`,\n    rows: [['Service', esc(r['Service'])], ['Date', esc(dateText)], ['Time', esc(time)],\n           ['Booking ID', esc(r['Booking ID'])], ['Where', esc(cfg.locationText)]],\n    button: { label: 'Change or cancel my booking', url: cfg.formUrl },\n    note: 'To change or cancel, open the booking form and enter the same email address you used to book.'\n  });\n  out.push({ json: {\n    bookingId: String(r['Booking ID']).trim(), email, stage: stage.key,\n    subject: is24 ? `Reminder: your appointment ${dayWord} at ${time}` : `Starting soon: your appointment at ${time}`,\n    html, remindersSentNew: sent.concat(stage.key).join(',')\n  }});\n}\nreturn out;"
+      },
+      "id": "37401f46-4eef-4328-8f01-56cff388aa9e",
+      "name": "Pick Reminders",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        750,
+        190
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d348402d-0e59-4e3d-9501-06e794db8526",
+      "name": "Send Reminder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1000,
+        190
+      ],
+      "webhookId": "f7644942-dac9-40eb-a98a-ac18865b404a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "JHvlGYu804nijBwY",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Config').first().json.sheetId }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Bookings",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Booking ID": "={{ $('Pick Reminders').item.json.bookingId }}",
+            "Reminder Sent": "={{ $('Pick Reminders').item.json.remindersSentNew }}"
+          },
+          "matchingColumns": [
+            "Booking ID"
+          ],
+          "schema": [
+            {
+              "id": "Booking ID",
+              "displayName": "Booking ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start Time",
+              "displayName": "Start Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "End Time",
+              "displayName": "End Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duration (min)",
+              "displayName": "Duration (min)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Calendar Event ID",
+              "displayName": "Calendar Event ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Changed Count",
+              "displayName": "Changed Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Previous Time",
+              "displayName": "Previous Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Canceled At",
+              "displayName": "Canceled At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reminder Sent",
+              "displayName": "Reminder Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "VA Notes",
+              "displayName": "VA Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "bbe394f1-5763-456a-a760-52089e143834",
+      "name": "Mark Reminder Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1250,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {},
+      "id": "15ea1335-fac8-42ac-90ed-3954e3650206",
+      "name": "Email failed - retry next run",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Reminders (Google Sheets)\nRuns every 15 min and reads the Bookings sheet. Sends ONE reminder ~24h before and ONE ~1h before. The reminder is only written to the 'Reminder Sent' column when the email really went out, so a failed email is retried on the next run. Canceled bookings are never reminded because the status is checked live. A moved booking is reminded again (the booking workflow clears the column).",
+        "height": 170,
+        "width": 1000,
+        "color": 4
+      },
+      "id": "a62d6431-9329-423b-839c-cdf95baa9951",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -10,
+        -25
+      ]
+    }
+  ],
+  "connections": {
+    "Every 15 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Read Bookings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Bookings": {
+      "main": [
+        [
+          {
+            "node": "Pick Reminders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Reminders": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reminder": {
+      "main": [
+        [
+          {
+            "node": "Mark Reminder Sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email failed - retry next run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Cairo"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
