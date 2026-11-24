@@ -1,0 +1,409 @@
+{
+  "name": "Publish on instagram & facebook",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        -16
+      ],
+      "id": "c59b2169-63c1-4db1-894f-185cb08f9b3c",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "انت وظيفتك توليد منشورات على الفيس بوك\nاولا هتعمل برومت لانشاء صورة بالانجليزية توصف الموضوع بتاع البوست\n\nثانيا هتكتب الوصف الي هيتم نشره فى البوست\n\n\nفى كل الاحوال يجب الرج بذه الطريقة\n{\n  \"prompt_image\": \"\",\n  \"caption\": \"\",\n}\nلا تقوم بالرد الا عن طريق json ولا تخرج عن صيفة الرد بالجيسون\nprompt_image : برومت توليد الصورة\ncaption : وصف الصورة\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        304,
+        -16
+      ],
+      "id": "e15df842-f4ec-4f92-bc18-1c733f45f024",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        144
+      ],
+      "id": "08111455-90dd-4498-a991-bb87d5b56b69",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "jsCode": "// الرد الحالي (نص عادي + JSON داخله)\nconst rawResponse = $input.first().json.output;\n\n// استخراج الجزء بتاع JSON من النص\nconst jsonStart = rawResponse.indexOf('{');\nconst jsonString = rawResponse.slice(jsonStart);\n\n// تحويله لـ JSON فعلي\nconst responseJSON = JSON.parse(jsonString);\n\n// النتيجة النهائية\nconsole.log(responseJSON);\n return { json: responseJSON };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -16
+      ],
+      "id": "a0160496-2eb7-40fe-936d-9a94635c412b",
+      "name": "Code to rewrite json"
+    },
+    {
+      "parameters": {
+        "jsCode": "const width = 1024;\nconst height = 1024;\nconst randomSeed = Math.floor(Math.random() * 100000);\n\nconst finalPrompt = $json.prompt_image;\nconst imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}.jpg?width=${width}&height=${height}&seed=${randomSeed}&model=flux&nologo=true`;\n\nreturn [\n  {\n    json: {\n      text: finalPrompt,\n      imageUrl\n    }\n  }\n];\n"
+      },
+      "id": "e949e307-80b6-4134-a8a5-975ae201f02b",
+      "name": "Create Pollinations URL",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        912,
+        -16
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.imageUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        -16
+      ],
+      "id": "72ae8f29-f9a9-496b-9cec-149f9c2b6d6e",
+      "name": "Fetch Image"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "me",
+        "edge": "photos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "caption",
+                "value": "={{ $('Code to rewrite json').item.json.caption }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        128
+      ],
+      "id": "e452924c-f296-4d66-982c-cb8b1bd7267e",
+      "name": "Facebook Graph API Publish image"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "me",
+        "edge": "videos",
+        "sendBinaryData": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "description",
+                "value": "={{ $('Code to rewrite json').item.json.caption }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        416
+      ],
+      "id": "1732bfbb-a658-43b9-bb86-d2411938fd57",
+      "name": "Facebook Graph Publish video"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.instagram.com/v22.0/Instagram_page_id/media?image_url={{ $json.imageUrl }}&caption={{ $json.text }}&access_token=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1536,
+        -496
+      ],
+      "id": "02a9d822-3ffa-4115-8754-8bec4eef8b48",
+      "name": "HTTP Request create media instagram photos"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.instagram.com/v22.0/Instagram_page_id/media_publish?creation_id={{ $json.id }}&access_token=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1776,
+        -496
+      ],
+      "id": "10ed1dc9-d392-432b-a802-7c6a3607e53e",
+      "name": "HTTP Request publish media instagram photos1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.instagram.com/v22.0/Instagram_page_id/media?image_url=VIDEO_URL&caption={{ $json.text }}&access_token=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1520,
+        -192
+      ],
+      "id": "4618045e-5f7f-45fc-8ae5-37f9271a6d7f",
+      "name": "HTTP Request create media instagram video"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.instagram.com/v22.0/Instagram_page_id/media_publish?creation_id={{ $json.id }}&access_token=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1776,
+        -192
+      ],
+      "id": "89633d85-3ec1-4c9d-acef-87ce6d3b5343",
+      "name": "HTTP Request publish media instagram video"
+    },
+    {
+      "parameters": {
+        "content": "## publish on instagram (Image)",
+        "height": 272,
+        "width": 544,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1456,
+        -592
+      ],
+      "typeVersion": 1,
+      "id": "a1a425e7-fc84-4939-a5c1-c6d2ec854aa1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## publish on instagram (video)",
+        "height": 272,
+        "width": 544,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1456,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "46a9af43-10a9-4861-a2eb-25273db39a57",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## publish on facebook (Image)",
+        "height": 272,
+        "width": 544,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1456,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "a3eac6ef-a518-4388-8450-da753608d045",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## publish on facebook (video)",
+        "height": 272,
+        "width": 544,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1456,
+        336
+      ],
+      "typeVersion": 1,
+      "id": "abf7eb0e-7c8a-4a32-acdd-594ef3e869f7",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "url": "https://yourvideourl.com/video.mp4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1504,
+        416
+      ],
+      "id": "f60c5c02-949d-4673-8299-2d7926bfcee4",
+      "name": "fetch video url"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code to rewrite json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code to rewrite json": {
+      "main": [
+        [
+          {
+            "node": "Create Pollinations URL",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "fetch video url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Pollinations URL": {
+      "main": [
+        [
+          {
+            "node": "Fetch Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Image": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API Publish image",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request create media instagram photos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request create media instagram video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request create media instagram photos": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request publish media instagram photos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request create media instagram video": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request publish media instagram video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch video url": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph Publish video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {},
+  "tags": []
+}
