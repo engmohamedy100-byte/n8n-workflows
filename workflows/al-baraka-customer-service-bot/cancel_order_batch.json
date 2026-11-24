@@ -1,0 +1,396 @@
+{
+  "name": "Al-Baraka - Cancel Order Batch (Sub-workflow)",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "order_id",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "trigger-cancel",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Orders",
+          "mode": "name"
+        },
+        "options": {},
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "order_id",
+              "lookupValue": "={{ $json.order_id }}"
+            }
+          ]
+        }
+      },
+      "id": "get-order",
+      "name": "Get Order",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        560,
+        300
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Inventory",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "get-cancel-inventory",
+      "name": "Get Inventory Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        820,
+        300
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const orderId = String($('Execute Workflow Trigger').first().json.order_id ?? '').trim();\nconst order = $('Get Order').first().json;\nconst inventory = $input.all().map(e => e.json).filter(r => r.item_name);\n\nconst stop = (result) => [{ json: { can_cancel: false, restocks: [], result } }];\n\nif (!order || !order.order_id) {\n  return stop({ success: false, reason: 'order_not_found', order_id: orderId });\n}\nif (order.status === 'ملغي') {\n  return stop({ success: false, reason: 'already_cancelled', order_id: orderId });\n}\nif (order.status !== 'قيد التحضير') {\n  return stop({ success: false, reason: 'cannot_cancel', status: order.status, order_id: orderId });\n}\n\nconst norm = (s) => String(s ?? '')\n  .replace(/[\\u064B-\\u065F\\u0670\\u0640]/g, '')\n  .replace(/[أإآ]/g, 'ا')\n  .replace(/ى/g, 'ي')\n  .replace(/ة/g, 'ه')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .toLowerCase();\n\nconst latinDigits = (s) => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));\n\nconst parts = String(order.items ?? '').split(/[,،]/).map(p => p.trim()).filter(Boolean);\nconst restockByRow = new Map();\nconst not_restocked_items = [];\n\nfor (const part of parts) {\n  const m = latinDigits(part).match(/^(.+?)\\s*(?:×|\\*|\\sx\\s)\\s*(\\d+(?:\\.\\d+)?)$/i);\n  const row = m && inventory.find(r => norm(r.item_name) === norm(m[1]));\n  if (!row) {\n    not_restocked_items.push(part);\n    continue;\n  }\n  const entry = restockByRow.get(row.row_number) || { row, qty: 0 };\n  entry.qty += Number(m[2]);\n  restockByRow.set(row.row_number, entry);\n}\n\nconst restocks = [...restockByRow.values()].map(({ row, qty }) => ({\n  row_number: row.row_number,\n  quantity_available: (Number(row.quantity_available) || 0) + qty\n}));\n\nreturn [{\n  json: {\n    can_cancel: true,\n    restocks,\n    result: { success: true, order_id: orderId, not_restocked_items }\n  }\n}];"
+      },
+      "id": "plan-cancel",
+      "name": "Plan Cancel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "can-cancel-cond",
+              "leftValue": "={{ $json.can_cancel }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "can-cancel",
+      "name": "Can Cancel",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Orders",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $('Execute Workflow Trigger').first().json.order_id }}",
+            "status": "ملغي"
+          },
+          "matchingColumns": [
+            "order_id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "update-order-status",
+      "name": "Update Order Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1600,
+        200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "has-restocks-cond",
+              "leftValue": "={{ $('Plan Cancel').first().json.restocks.length }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "rightValue": 0
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "has-restocks",
+      "name": "Has Restocks",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1860,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $('Plan Cancel').first().json.restocks.map(r => ({ json: r }));"
+      },
+      "id": "restock-items",
+      "name": "Restock Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2120,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Inventory",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "quantity_available": "={{ $json.quantity_available }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ]
+        },
+        "options": {}
+      },
+      "id": "restock-inventory",
+      "name": "Update Inventory Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2380,
+        100
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: $('Plan Cancel').first().json.result }];"
+      },
+      "id": "cancel-result",
+      "name": "Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order": {
+      "main": [
+        [
+          {
+            "node": "Get Inventory Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Inventory Rows": {
+      "main": [
+        [
+          {
+            "node": "Plan Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan Cancel": {
+      "main": [
+        [
+          {
+            "node": "Can Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Can Cancel": {
+      "main": [
+        [
+          {
+            "node": "Update Order Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Order Status": {
+      "main": [
+        [
+          {
+            "node": "Has Restocks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Restocks": {
+      "main": [
+        [
+          {
+            "node": "Restock Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restock Items": {
+      "main": [
+        [
+          {
+            "node": "Update Inventory Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Inventory Sheet": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
