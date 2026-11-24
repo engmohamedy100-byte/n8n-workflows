@@ -1,0 +1,96 @@
+{
+  "name": "Al-Baraka - Check Inventory Batch (Sub-workflow)",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "items",
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "id": "trigger-check-batch",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_SPREADSHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Inventory",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "get-inventory-rows",
+      "name": "Get Inventory Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        560,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PUT_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const requested = $('Execute Workflow Trigger').first().json.items || [];\nconst inventory = $input.all().map(e => e.json).filter(r => r.item_name);\n\nconst norm = (s) => String(s ?? '')\n  .replace(/[\\u064B-\\u065F\\u0670\\u0640]/g, '')\n  .replace(/[أإآ]/g, 'ا')\n  .replace(/ى/g, 'ي')\n  .replace(/ة/g, 'ه')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .toLowerCase();\n\nconst findRow = (name) => {\n  const key = norm(name);\n  if (!key) return { row: null, candidates: [] };\n  const exact = inventory.filter(r => norm(r.item_name) === key);\n  if (exact.length === 1) return { row: exact[0], candidates: [] };\n  const pool = exact.length ? exact : inventory.filter(r => {\n    const n = norm(r.item_name);\n    return n && (n.includes(key) || key.includes(n));\n  });\n  if (pool.length === 1) return { row: pool[0], candidates: [] };\n  return { row: null, candidates: pool.map(r => String(r.item_name).trim()) };\n};\n\nconst wanted = new Map();\nconst unmatched_items = [];\n\nfor (const req of requested) {\n  const qty = Number(req.quantity ?? req.qty);\n  if (!Number.isFinite(qty) || qty <= 0) {\n    unmatched_items.push({ name: req.name, reason: 'invalid_quantity', candidates: [] });\n    continue;\n  }\n  const { row, candidates } = findRow(req.name);\n  if (!row) {\n    unmatched_items.push({ name: req.name, reason: candidates.length ? 'ambiguous' : 'not_found', candidates });\n    continue;\n  }\n  const entry = wanted.get(row.row_number) || { row, qty: 0 };\n  entry.qty += qty;\n  wanted.set(row.row_number, entry);\n}\n\nconst full_check = [...wanted.values()].map(({ row, qty }) => {\n  const stock = Number(row.quantity_available);\n  const availableQty = Number.isFinite(stock) ? stock : 0;\n  return {\n    name: String(row.item_name).trim(),\n    requested_qty: qty,\n    available_qty: availableQty,\n    sufficient: availableQty >= qty,\n    row_number: row.row_number\n  };\n});\n\nconst confirmed_items = full_check.filter(r => r.sufficient);\nconst unavailable_items = full_check.filter(r => !r.sufficient);\n\nreturn [{\n  json: {\n    all_available: unavailable_items.length === 0 && unmatched_items.length === 0,\n    confirmed_items,\n    unavailable_items,\n    unmatched_items,\n    full_check\n  }\n}];"
+      },
+      "id": "compare-items",
+      "name": "Compare Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Inventory Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Inventory Rows": {
+      "main": [
+        [
+          {
+            "node": "Compare Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
