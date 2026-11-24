@@ -11,25 +11,40 @@ and what is wrong with it.
 
 ## Workflows
 
+A collection of eleven production n8n automations covering AI customer service,
+sales pipeline automation, appointment scheduling, recruitment, job search,
+competitor monitoring, proposal generation and financial alerting.
+
+Every workflow here is **sanitized**: API keys, personal data and
+instance-specific resource ids have been replaced with named placeholders. Each
+one ships with documentation covering what it does, how data moves through it,
+and what is wrong with it.
+
+## Workflows
+
 | Workflow | Nodes | Trigger | What it does |
 |---|---:|---|---|
 | [End-to-End Sales Pipeline](workflows/end-to-end-sales-pipeline/) | 109 | 9 triggers | Full sales lifecycle on Notion — lead capture through onboarding. |
 | [AI Customer Service & Sales](workflows/ai-customer-service-sales-system/) | 101 | Webhook + 4 | Arabic WhatsApp agent with RAG over Supabase, Airtable CRM. |
+| [Appointment Booking](workflows/appointment-booking-google-sheets/) | 63 | n8n Form | Book / change / cancel with Calendar free-busy checks, Sheets storage and rollback. |
 | [Job Application Pipeline](workflows/job-application-form-pipeline/) | 34 | Form + 2 schedules | Applicant intake, AI CV scoring, scheduled cleanup. |
+| [Gamma Proposal Generation](workflows/gamma-proposal-generation/) | 26 | Fireflies webhook + 2 | Meeting transcript to a Slack-approved, AI-written Gamma proposal deck. |
 | [Tadawul Disclosure Monitor](workflows/tadawul-disclosure-monitor/) | 24 | Schedule (30 min) | Saudi Exchange disclosure alerts with LLM analysis. |
 | [Gmail Triage & Auto-Reply](workflows/gmail-triage-auto-reply/) | 17 | Gmail | Classifies mail, labels it, drafts or sends an AI reply. |
 | [LinkedIn Jobs Tracker](workflows/linkedin-jobs-tracker/) | 16 | Manual | Scrapes company job postings via Apify into Sheets. |
 | [Competitor Web Scraping](workflows/competitor-web-scraping/) | 11 | Schedule (monthly) | Price/stock change detection with email alerts. |
+| [Appointment Reminders](workflows/appointment-reminders-google-sheets/) | 8 | Schedule (15 min) | 24h and 1h email reminders from the Bookings sheet, retried until sent. |
 | [Job Search (RapidAPI)](workflows/job-search-rapidapi/) | 6 | Manual | JSearch listings to Sheets and WhatsApp. |
 
-318 nodes total.
+415 nodes total.
 
 ## Stack
 
 **Orchestration:** n8n
 **AI:** OpenAI, Groq, OpenRouter, Google Gemini embeddings
-**Data:** Airtable, Notion, Supabase (pgvector), Google Sheets
-**Messaging:** WhatsApp (Green API), Telegram, Gmail
+**Data:** Airtable, Notion, Supabase (pgvector), Google Sheets, Google Calendar
+**Messaging:** WhatsApp (Green API), Telegram, Gmail, Slack
+**Meetings & decks:** Fireflies.ai, Gamma
 **Scraping/search:** Apify, Serper.dev, RapidAPI
 
 ## Using a workflow
@@ -50,6 +65,7 @@ and what is wrong with it.
 | `<AIRTABLE_BASE_ID_n>`, `<AIRTABLE_TABLE_ID_n>` | Airtable resources. |
 | `<NOTION_PAGE_ID_n>` | Notion databases and pages. |
 | `<YOUR_TELEGRAM_CHAT_ID>`, `<YOUR_WHATSAPP_ID>` | Messaging destinations. |
+| `YOUR_EMAIL`, `YOUR_CALENDAR_ID`, `YOUR_GOOGLE_SHEET_ID`, `YOUR_SLACK_CHANNEL_ID` | Owner email, calendar, sheet and channel ids in the appointment and proposal workflows (no angle brackets — that is how those files ship). |
 | `<YOUR_GOOGLE_CALENDAR_ID>` | Calendar id. |
 
 All `webhookId` values were regenerated. n8n assigns new ones on import in any
@@ -78,7 +94,7 @@ These are real workflows, warts included, and each README documents the specific
 problems in that workflow rather than pretending they aren't there. The recurring
 themes:
 
-- **Error handling is the weakest area.** Two of the eight configure it
+- **Error handling is the weakest area.** Three of the eleven configure it
   meaningfully. `tadawul-disclosure-monitor` is the reference implementation —
   every failure path routes to a shared error sink and the loop continues.
 - **Read-then-write races.** Several use Google Sheets or Airtable as a
